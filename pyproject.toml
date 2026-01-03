@@ -1,0 +1,85 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "typer-aliases"
+version = "0.1.0"
+description = "Command aliases for Typer CLI applications"
+authors = [{name = "Rob Webb"}]
+requires-python = ">=3.10"
+license = {text = "MIT"}
+keywords = ["typer", "cli", "aliases", "command-line", "click"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Shells",
+    "Typing :: Typed",
+]
+dependencies = [
+    "click>=8.0.0",
+    "typer>=0.9.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pre-commit>=3.0.0",
+    "pytest>=9.0.0",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.1.0",
+    "ty>=0.0.8"
+]
+
+[project.urls]
+Homepage = "https://github.com/rdawebb/typer-aliases"
+Documentation = "https://github.com/rdawebb/typer-aliases#readme"
+Repository = "https://github.com/rdawebb/typer-aliases"
+Changelog = "https://github.com/rdawebb/typer-aliases/blob/main/CHANGELOG.md"
+Issues = "https://github.com/rdawebb/typer-aliases/issues"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/tests",
+    "/README.MD",
+    "/LICENSE"
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/typer_aliases"]
+
+[tool.ruff]
+src = ["src", "tests"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]    # allow unused imports in __init__.py
+"tests/**/*.py" = ["ARG"]   # allow unused arguments in tests
+
+[tool.coverage.run]
+source = ["src"]
+branch = true
+omit = [
+    "*/tests/*",
+    "*/__pycache__/*",
+    "*/.venv/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+    "@abc.abstractmethod",
+]

@@ -1,0 +1,33 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.15
+    hooks:
+      # Lint
+      - id: ruff
+        args: [--fix]
+      # Format
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-json
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: detect-private-key
+
+  # Type checking with ty (local hook - runs after ruff)
+  - repo: local
+    hooks:
+      - id: ty
+        name: ty
+        entry: ty
+        language: system
+        types: [python]
+        pass_filenames: false
+        args: [check, src/]
