@@ -1,10 +1,52 @@
 """Core AliasedTyper class extending typer.Typer with alias support"""
 
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, cast
 
 import typer
 import typer.main
 from click import Command, Context, Group
+from typer.core import TyperGroup
+
+
+class AliasedGroup(Group):
+    """Custom Click Group that handles command aliases"""
+
+    def __init__(
+        self,
+        *args: Any,
+        aliased_typer: Optional["AliasedTyper"] = None,
+        **kwargs: Any,
+    ) -> None:
+        """Initialise the AliasedGroup
+
+        Args:
+            aliased_typer: Reference to the AliasedTyper instance for alias resolution
+            *args, **kwargs: Arguments passed to Click Group
+        """
+        super().__init__(*args, **kwargs)
+        self.aliased_typer = aliased_typer
+
+    def get_command(self, ctx: Context, cmd_name: str) -> Optional[Command]:
+        """Override Click's get_command to support aliases
+
+        Args:
+            ctx: The Click context
+            cmd_name: The name of the command
+
+        Returns:
+            The command if found, None otherwise
+        """
+        cmd = super().get_command(ctx, cmd_name)
+        if cmd is not None:
+            return cmd
+
+        # Resolve alias if command not found
+        if self.aliased_typer is not None:
+            primary_cmd = self.aliased_typer._resolve_alias(cmd_name)
+            if primary_cmd is not None:
+                return super().get_command(ctx, primary_cmd)
+
+        return None
 
 
 # Store original function
@@ -14,7 +56,7 @@ _original_get_group_from_info = typer.main.get_group_from_info
 def _aliased_get_group_from_info(
     typer_info: "typer.main.TyperInfo",
     **kwargs: Any,
-) -> "AliasedGroup | typer.core.TyperGroup":
+) -> AliasedGroup | TyperGroup:
     """Custom version of get_group_from_info that returns AliasedGroup for AliasedTyper instances
 
     Args:
@@ -53,48 +95,8 @@ def _aliased_get_group_from_info(
     return group
 
 
-# Apply the monkey-patch to Typer's group creation function
-typer.main.get_group_from_info = _aliased_get_group_from_info
-
-
-class AliasedGroup(Group):
-    """Custom Click Group that handles command aliases"""
-
-    def __init__(
-        self,
-        *args: Any,
-        aliased_typer: Optional["AliasedTyper"] = None,
-        **kwargs: Any,
-    ) -> None:
-        """Initialize the AliasedGroup
-
-        Args:
-            aliased_typer: Reference to the AliasedTyper instance for alias resolution
-            *args, **kwargs: Arguments passed to Click Group
-        """
-        super().__init__(*args, **kwargs)
-        self.aliased_typer = aliased_typer
-
-    def get_command(self, ctx: Context, cmd_name: str) -> Optional[Command]:
-        """Override Click's get_command to support aliases
-
-        Args:
-            ctx: The Click context
-            cmd_name: The name of the command
-
-        Returns:
-            The command if found, None otherwise
-        """
-        cmd = super().get_command(ctx, cmd_name)
-        if cmd is not None:
-            return cmd
-
-        if self.aliased_typer is not None:
-            primary_cmd = self.aliased_typer._resolve_alias(cmd_name)
-            if primary_cmd is not None:
-                return super().get_command(ctx, primary_cmd)
-
-        return None
+# Apply monkey-patch to Typer's group creation function
+typer.main.get_group_from_info = _aliased_get_group_from_info  # type: ignore[assignment]
 
 
 class AliasedTyper(typer.Typer):
@@ -147,18 +149,6 @@ class AliasedTyper(typer.Typer):
         """
         normalised_alias = self._normalise_name(alias)
         normalised_cmd = self._normalise_name(command_name)
-
-        # Check if alias conflicts with existing commands
-        if self.registered_commands is not None:
-            existing_cmds = {
-                self._normalise_name(cmd.name)
-                for cmd in self.registered_commands
-                if cmd.name
-            }
-            if normalised_alias in existing_cmds:
-                raise ValueError(
-                    f"Alias '{alias}' conflicts with existing command '{self._alias_to_command[normalised_alias]}'"
-                )
 
         # Check if alias is the same as command name
         if normalised_alias == normalised_cmd:
@@ -236,16 +226,31 @@ class AliasedTyper(typer.Typer):
         Returns:
             The command if found, else None
         """
-        if self.registered_commands:
-            for cmd_info in self.registered_commands:
-                if cmd_info.name == cmd_name:
-                    return cmd_info
+        if not hasattr(self, "_group") or self._group is None:
+            if not hasattr(self, "_command") or self._command is None:
+                # Trigger CLI build
+                click_obj = typer.main.get_command(self)
+
+                if hasattr(click_obj, "commands"):
+                    self._group = click_obj
+                else:
+                    self._command = click_obj
 
         primary_cmd = self._resolve_alias(cmd_name)
-        if primary_cmd is not None:
-            if self.registered_commands:
-                for cmd_info in self.registered_commands:
-                    if cmd_info.name == primary_cmd:
-                        return cmd_info
+        effective_name = primary_cmd if primary_cmd is not None else cmd_name
+
+        # Single command apps
+        if hasattr(self, "_command") and self._command is not None:
+            command = self._command
+            if command.name == effective_name:
+                return command
+            return None
+
+        # Multi-command apps
+        if hasattr(self, "_group") and self._group is not None:
+            group = cast(Group, self._group)
+            if effective_name in group.commands:
+                return group.commands[effective_name]
+            return group.get_command(ctx, effective_name)
 
         return None

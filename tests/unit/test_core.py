@@ -26,11 +26,11 @@ class TestAliasedTyperinitialisation:
         assert app._show_aliases_in_help is False
 
 
-class TestNameNormalization:
-    """Tests for name normalization based on case sensitivity"""
+class TestNameNormalisation:
+    """Tests for name normalisation based on case sensitivity"""
 
     def test_normalise_case_sensitive(self):
-        """Test name normalization with case sensitivity"""
+        """Test name normalisation with case sensitivity"""
         app = AliasedTyper(alias_case_sensitive=True)
         assert app._normalise_name("List") == "List"
         assert app._normalise_name("list") == "list"
@@ -205,15 +205,19 @@ class TestCommandWithAliases:
 
         app._register_command_with_aliases(list_items, "list", aliases=["ls"])
 
-        with pytest.raises(ValueError, match="conflicts with existing command"):
+        with pytest.raises(ValueError, match="already registered"):
             app._register_command_with_aliases(delete_items, "delete", aliases=["ls"])
 
 
 class TestGetCommand:
-    """Tests for get_command with alias support"""
+    """Tests for get_command with alias support
 
-    def test_get_command_by_primary_name(self):
-        """Test getting command by its primary name"""
+    Note: These tests focus on multi-command scenarios, as single-command
+    apps don't meaningfully support aliases (the command becomes the default)
+    """
+
+    def test_get_command_multiple_commands_by_primary_name(self):
+        """Test getting command by primary name in multi-command app"""
         from unittest.mock import MagicMock
 
         app = AliasedTyper()
@@ -223,15 +227,19 @@ class TestGetCommand:
             """List items."""
             pass
 
-        # Create a mock context
+        @app.command("delete")
+        def delete_items():
+            """Delete items."""
+            pass
+
         ctx = MagicMock()
 
         cmd = app.get_command(ctx, "list")
         assert cmd is not None
         assert cmd.name == "list"
 
-    def test_get_command_by_alias(self):
-        """Test getting command by alias."""
+    def test_get_command_by_alias_in_multi_command_app(self):
+        """Test getting command by alias in multi-command app"""
         from unittest.mock import MagicMock
 
         app = AliasedTyper()
@@ -240,25 +248,42 @@ class TestGetCommand:
             """List items."""
             pass
 
-        app._register_command_with_aliases(list_items, "list", aliases=["ls"])
+        def delete_items():
+            """Delete items."""
+            pass
 
-        # Create a mock context
+        # Register commands with aliases
+        app._register_command_with_aliases(list_items, "list", aliases=["ls"])
+        app._register_command_with_aliases(delete_items, "delete", aliases=["del"])
+
         ctx = MagicMock()
 
-        cmd = app.get_command(ctx, "ls")
-        assert cmd is not None
+        # Test getting by alias
+        cmd_ls = app.get_command(ctx, "ls")
+        cmd_list = app.get_command(ctx, "list")
 
-        # Command should be the same as the primary
-        primary_cmd = app.get_command(ctx, "list")
-        assert cmd.callback == primary_cmd.callback
+        assert cmd_ls is not None, "Failed to get command by alias 'ls'"
+        assert cmd_list is not None, "Failed to get command by name 'list'"
+        assert cmd_ls.callback == cmd_list.callback, (
+            "Alias and primary command should have same callback"
+        )
 
-    def test_get_command_nonexistent(self):
+    def test_get_command_nonexistent_in_multi_command_app(self):
         """Test getting non-existent command returns None"""
         from unittest.mock import MagicMock
 
         app = AliasedTyper()
 
-        # Create a mock context
+        @app.command("list")
+        def list_items():
+            """List items."""
+            pass
+
+        @app.command("delete")
+        def delete_items():
+            """Delete items."""
+            pass
+
         ctx = MagicMock()
 
         cmd = app.get_command(ctx, "nonexistent")
@@ -274,11 +299,120 @@ class TestGetCommand:
             """List items."""
             pass
 
-        app._register_command_with_aliases(list_items, "list", aliases=["ls"])
+        def delete_items():
+            """Delete items."""
+            pass
 
-        # Create a mock context
+        app._register_command_with_aliases(list_items, "list", aliases=["ls"])
+        app._register_command_with_aliases(delete_items, "delete", aliases=["del"])
+
         ctx = MagicMock()
 
         # Should work with different case
         cmd = app.get_command(ctx, "LS")
         assert cmd is not None
+
+    def test_get_command_multiple_aliases_same_command(self):
+        """Test getting command by different aliases"""
+        from unittest.mock import MagicMock
+
+        app = AliasedTyper()
+
+        def list_items():
+            """List items."""
+            pass
+
+        def delete_items():
+            """Delete items."""
+            pass
+
+        app._register_command_with_aliases(list_items, "list", aliases=["ls", "l"])
+        app._register_command_with_aliases(
+            delete_items, "delete", aliases=["del", "rm"]
+        )
+
+        ctx = MagicMock()
+
+        # Test all aliases point to same command
+        cmd_list = app.get_command(ctx, "list")
+        cmd_ls = app.get_command(ctx, "ls")
+        cmd_l = app.get_command(ctx, "l")
+
+        assert cmd_list is not None
+        assert cmd_ls is not None
+        assert cmd_l is not None
+        assert cmd_ls.callback == cmd_list.callback
+        assert cmd_l.callback == cmd_list.callback
+
+    def test_get_command_single_command_app(self):
+        """Test getting command returns the default command"""
+        from unittest.mock import MagicMock
+
+        app = AliasedTyper()
+
+        @app.command("list")
+        def list_items():
+            """List items."""
+            pass
+
+        ctx = MagicMock()
+
+        # Should return the command
+        cmd = app.get_command(ctx, "list")
+        assert cmd is not None
+        assert cmd.name == "list"
+
+        # Should not resolve an alias
+        cmd_alias = app.get_command(ctx, "ls")
+        assert cmd_alias is None
+
+    def test_get_command_with_unknown_command(self):
+        """Test None is returned for unknown commands"""
+        from unittest.mock import MagicMock
+
+        app = AliasedTyper()
+
+        @app.command("list")
+        def list_items():
+            """List items."""
+            pass
+
+        ctx = MagicMock()
+
+        assert app.get_command(ctx, "unknown") is None
+
+
+class TestAliasedGroup:
+    """Tests for AliasedGroup get_command"""
+
+    def test_get_command_by_alias(self):
+        """Test AliasedGroup resolves a command by alias"""
+        from click import Context
+        from typer_aliases.core import AliasedGroup
+
+        app = AliasedTyper()
+
+        def list_items():
+            """List items."""
+            pass
+
+        app._register_command_with_aliases(list_items, "list", aliases=["ls"])
+        group = AliasedGroup(aliased_typer=app)
+        ctx = Context(group)
+
+        cmd = app.get_command(ctx, "list")
+        assert cmd is not None
+        group.add_command(cmd, name="list")
+
+        assert group.get_command(ctx, "ls") is not None
+
+    def test_get_command_with_unknown_command(self):
+        """Test AliasedGroup returns None for unknown command/alias"""
+        from click import Context
+        from typer_aliases.core import AliasedGroup
+
+        app = AliasedTyper()
+        group = AliasedGroup(aliased_typer=app)
+        ctx = Context(group)
+
+        assert group.get_command(ctx, "unknown") is None

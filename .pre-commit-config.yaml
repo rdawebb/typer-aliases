@@ -1,33 +1,46 @@
 repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        name: Check trailing whitespace
+      - id: end-of-file-fixer
+        name: Fix end of file
+      - id: check-yaml
+        name: Check YAML
+      - id: check-added-large-files
+        args: ['--maxkb=100']
+        name: Check added large files
+      - id: check-toml
+        name: Check TOML
+      - id: check-merge-conflict
+        name: Check merge conflict
+      - id: detect-private-key
+        name: Check private keys
+
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.1.15
+    rev: v0.14.10
     hooks:
       # Lint
       - id: ruff
         args: [--fix]
+        name: Check linting
       # Format
       - id: ruff-format
+        name: Check formatting
 
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
-    hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-      - id: check-yaml
-      - id: check-added-large-files
-        args: ['--maxkb=1000']
-      - id: check-json
-      - id: check-toml
-      - id: check-merge-conflict
-      - id: detect-private-key
-
-  # Type checking with ty (local hook - runs after ruff)
   - repo: local
     hooks:
-      - id: ty
-        name: ty
-        entry: ty
-        language: system
-        types: [python]
-        pass_filenames: false
-        args: [check, src/]
+    - id: ty-type-check
+      name: Check type safety
+      entry: ty check src tests
+      language: system
+      types: [python]
+
+  - repo: local
+    hooks:
+    - id: python-syntax-check
+      name: Check for Python syntax errors
+      entry: python -m py_compile
+      language: system
+      types: [python]

@@ -13,8 +13,9 @@ help:
 	@echo "  make test-cov              Run all tests with coverage report"
 	@echo ""
 	@echo "Code Quality:"
-	@echo "  make lint                 Run linting and formatting checks (ruff)"
-	@echo "  make format               Format code with ruff"
+	@echo "  make lint                 Run linting checks (ruff)"
+	@echo "  make format               Format code (ruff)"
+	@echo "  make type                 Run type checking (ty)"
 	@echo ""
 	@echo "Maintenance:"
 	@echo "  make clean                Remove build artifacts and cache"
@@ -40,6 +41,9 @@ lint:
 format:
 	uv run ruff format src tests
 	uv run ruff check --fix src tests
+
+type:
+	uv run ty check src tests
 
 clean:
 	uv run python scripts/clean.py
