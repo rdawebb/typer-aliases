@@ -37,7 +37,7 @@ class TestDecoratorInvocation:
         assert result.exit_code == 0
         assert "Listing items..." in result.output
 
-    def test_invoke_bare_decorator(self, cli_runner):
+    def test_invoke_bare_decorator(self, cli_runner, clean_output):
         """Test invoking command decorated without parentheses"""
         app = AliasedTyper()
 
@@ -48,9 +48,9 @@ class TestDecoratorInvocation:
 
         result = cli_runner.invoke(app, ["hello"])
         assert result.exit_code != 0
-        assert "Usage: hello" in result.output
+        assert "Usage: hello" in clean_output(result.output)
 
-    def test_bare_decorator_with_aliases(self, cli_runner):
+    def test_bare_decorator_with_aliases(self, cli_runner, clean_output):
         """Test invoking command decorated without parentheses and with aliases"""
         app = AliasedTyper()
 
@@ -61,7 +61,7 @@ class TestDecoratorInvocation:
 
         result = cli_runner.invoke(app, ["hello"])
         assert result.exit_code != 0
-        assert "Usage: hello" in result.output
+        assert "Usage: hello" in clean_output(result.output)
 
 
 class TestDecoratorWithTyperFeatures:
@@ -162,7 +162,7 @@ class TestDecoratorHelpDisplay:
         assert "List all items" in result.output
         assert "Delete an item" in result.output
 
-    def test_command_help_via_primary(self, cli_runner):
+    def test_command_help_via_primary(self, cli_runner, clean_output):
         """Test command help via primary name"""
         app = AliasedTyper()
 
@@ -173,10 +173,11 @@ class TestDecoratorHelpDisplay:
 
         result = cli_runner.invoke(app, ["list", "--help"])
         assert result.exit_code == 0
-        assert "List all items" in result.output
-        assert "--verbose" in result.output
+        clean_result = clean_output(result.output)
+        assert "List all items" in clean_result
+        assert "--verbose" in clean_result
 
-    def test_command_help_via_alias(self, cli_runner):
+    def test_command_help_via_alias(self, cli_runner, clean_output):
         """Test command help via alias"""
         app = AliasedTyper()
 
@@ -187,8 +188,9 @@ class TestDecoratorHelpDisplay:
 
         result = cli_runner.invoke(app, ["ls", "--help"])
         assert result.exit_code == 0
-        assert "List all items" in result.output
-        assert "--verbose" in result.output
+        clean_result = clean_output(result.output)
+        assert "List all items" in clean_result
+        assert "--verbose" in clean_result
 
     def test_help_hides_alias_commands(self, cli_runner):
         """Test that alias commands don't appear separately in help"""

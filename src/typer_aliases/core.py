@@ -42,17 +42,22 @@ class AliasedGroup(Group):
         Returns:
             The command if found, None otherwise
         """
+        if self.aliased_typer is None:
+            return super().get_command(ctx, cmd_name)
+
+        # Check if this name is a removed alias
+        normalised_name = self.aliased_typer._normalise_name(cmd_name)
+        if normalised_name in self.aliased_typer._removed_aliases:
+            return None
+
+        # Try to resolve as an active alias first
+        primary_cmd = self.aliased_typer._resolve_alias(cmd_name)
+        if primary_cmd is not None:
+            return super().get_command(ctx, primary_cmd)
+
         cmd = super().get_command(ctx, cmd_name)
         if cmd is not None:
             return cmd
-
-        # Resolve alias if command not found
-        if self.aliased_typer is not None:
-            primary_cmd = self.aliased_typer._resolve_alias(cmd_name)
-            if primary_cmd is not None:
-                return super().get_command(ctx, primary_cmd)
-
-        return None
 
 
 # Store original function
@@ -131,6 +136,8 @@ class AliasedTyper(typer.Typer):
         # Mapping of command names to aliases (O(1) lookup)
         self._command_aliases: dict[str, list[str]] = {}
         self._alias_to_command: dict[str, str] = {}
+        # Track removed aliases so they don't resolve
+        self._removed_aliases: set[str] = set()
 
     def _normalise_name(self, name: str) -> str:
         """Normalise command/alias name based on case sensitivity
@@ -169,6 +176,10 @@ class AliasedTyper(typer.Typer):
                 f"Alias '{alias}' is already registered for command '{existing_cmd}'"
             )
 
+        # Allow re-registering if it was previously removed
+        if normalised_alias in self._removed_aliases:
+            self._removed_aliases.discard(normalised_alias)
+
         # Register the alias
         self._alias_to_command[normalised_alias] = command_name
 
@@ -200,13 +211,19 @@ class AliasedTyper(typer.Typer):
         """
         aliases = aliases or []
 
-        command = self.command(name, **kwargs)(func)
+        self.command(name, **kwargs)(func)
 
         for alias in aliases:
             self._register_alias(name, alias)
             alias_kwargs = kwargs.copy()
             alias_kwargs["hidden"] = True
             self.command(alias, **alias_kwargs)(func)
+
+        click_obj = typer.main.get_command(self)
+        if isinstance(click_obj, Group):
+            command = click_obj.commands[name]
+        else:
+            command = click_obj
 
         return command
 
@@ -217,9 +234,12 @@ class AliasedTyper(typer.Typer):
             name: The command/alias name to resolve
 
         Returns:
-            The primary command name if found, else None
+            The primary command name if found, or None if not found or removed
         """
         normalised_name = self._normalise_name(name)
+        if normalised_name in self._removed_aliases:
+            return None
+
         return self._alias_to_command.get(normalised_name)
 
     def get_command(self, ctx: Context, cmd_name: str) -> Optional[Command]:
@@ -307,3 +327,115 @@ class AliasedTyper(typer.Typer):
             )
 
         return decorator
+
+    def add_aliased_command(
+        self,
+        func: Callable[..., Any],
+        name: Optional[str] = None,
+        aliases: Optional[list[str]] = None,
+        **kwargs: Any,
+    ) -> Command:
+        """Programmatically register a command with aliases
+
+        Args:
+            func: The command function
+            name: The name of the command - if not provided, inferred from the function name
+            aliases: A list of aliases for the command
+            **kwargs: Additional keyword arguments for command registration
+
+        Returns:
+            The registered Click Command object
+
+        Raises:
+            ValueError: If any alias conflicts with existing commands/aliases
+        """
+        if isinstance(name, str) and name:
+            command_name = name
+        else:
+            command_name = cast(HasName, func).__name__
+
+        return self._register_command_with_aliases(
+            func, name=command_name, aliases=aliases, **kwargs
+        )
+
+    def add_alias(self, command_name: str, alias: str) -> None:
+        """Programmatically add an alias to an existing command
+
+        This does not allow adding aliases to single-command applications, in line with Typer's design principle of treating single-commands apps as the default command, making aliases redundant
+
+        Args:
+            command_name: The name of the existing command
+            alias: The alias to add
+
+        Raises:
+            ValueError: If the command doesn't exist, is a single-command app, or the alias conflicts with existing commands/aliases
+        """
+        # Get the underlying Click group
+        click_obj = typer.main.get_command(self)
+
+        if not isinstance(click_obj, Group):
+            raise ValueError("Cannot add aliases to single-command applications")
+
+        existing_command = click_obj.get_command(Context(click_obj), command_name)
+        if existing_command is None:
+            raise ValueError(f"Command '{command_name}' does not exist")
+
+        self._register_alias(command_name, alias)
+        self.command(alias, hidden=True)(existing_command.callback)
+
+    def remove_alias(self, alias: str) -> bool:
+        """Programmatically remove an alias from an existing command
+
+        This removes the alias from the tracking list and marks it as removed, preventing it from being invoked, as Click doesn't provide an API for removing commands
+
+        Args:
+            alias: The alias to remove
+
+        Returns:
+            True if the alias was removed, False if it doesn't exist
+        """
+        normalised_alias = self._normalise_name(alias)
+
+        if normalised_alias not in self._alias_to_command:
+            return False
+
+        primary_name = self._alias_to_command[normalised_alias]
+        del self._alias_to_command[normalised_alias]
+
+        # Mark this alias as removed so it won't resolve
+        self._removed_aliases.add(normalised_alias)
+
+        if primary_name in self._command_aliases:
+            try:
+                self._command_aliases[primary_name].remove(alias)
+
+                if not self._command_aliases[primary_name]:
+                    del self._command_aliases[primary_name]
+
+            except ValueError:
+                pass
+
+        return True
+
+    def get_aliases(self, command_name: str) -> list[str]:
+        """Retrieve the list of aliases for a given command
+
+        Args:
+            command_name: The name of the command
+
+        Returns:
+            A list of aliases for the command, or an empty list if no aliases or command doesn't exist
+        """
+        if command_name in self._command_aliases:
+            return self._command_aliases[command_name].copy()
+        return []
+
+    def list_commands_with_aliases(self) -> dict[str, list[str]]:
+        """List all commands and their aliases
+
+        Returns a dictionary mapping command names to their aliases - only includes commands with aliases and returns a copy, so modifications won't affect the original
+
+        Returns:
+            A dictionary mapping command names to their aliases, or an empty dictionary if no commands have aliases
+        """
+        return {cmd: aliases.copy() for cmd, aliases in self._command_aliases.items()}

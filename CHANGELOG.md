@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+
+### Added
+
+- Programmatic API methods for dynamic command and alias management:
+  - `add_aliased_command()` for programmatically registering commands with aliases
+  - `add_alias()` for dynamically adding aliases to existing commands
+  - `remove_alias()` for removing aliases with proper tracking
+  - `get_aliases()` for retrieving aliases for a specific command
+  - `list_commands_with_aliases()` for querying all commands and their aliases
+- Alias removal tracking to prevent removed aliases from being invoked
+- Comprehensive integration tests for programmatic API usage
+- Unit tests for all programmatic API methods
+- `clean_output` pytest fixture for consistent test assertions across environments
+
+
 ## [0.1.0] - 2026/01/08
 
 ### Added
@@ -24,3 +40,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - CI/CD pipeline with GitHub Actions for testing across Python 3.10-3.14
 - Pre-commit hooks for code quality (linting, formatting, type checking, syntax validation)
 - Initial project structure with Makefile and development tooling
+
+
+[0.1.0](https://github.com/rdawebb/typer-aliases/releases/tag/v0.1.0-alpha)
