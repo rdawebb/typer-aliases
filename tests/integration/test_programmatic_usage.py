@@ -14,7 +14,11 @@ class TestProgrammaticCommandInvocation:
         def list_items():
             print("Listing items...")
 
+        def delete_item():
+            print("Deleting item...")
+
         app.add_aliased_command(list_items, "list", aliases=["ls"])
+        app.add_aliased_command(delete_item, "delete", aliases=["rm", "del"])
 
         result = cli_runner.invoke(app, ["list"])
         assert result.exit_code == 0
@@ -86,7 +90,11 @@ class TestProgrammaticWithArguments:
         def greet(name: str):
             print(f"Hello, {name}!")
 
+        def farewell(name: str):
+            print(f"Goodbye, {name}!")
+
         app.add_aliased_command(greet, "greet", aliases=["hi"])
+        app.add_aliased_command(farewell, "farewell", aliases=["bye"])
 
         result = cli_runner.invoke(app, ["greet", "World"])
         assert result.exit_code == 0
@@ -108,7 +116,11 @@ class TestProgrammaticWithArguments:
             else:
                 print("Listing...")
 
+        def delete_item():
+            print("Deleting item...")
+
         app.add_aliased_command(list_items, "list", aliases=["ls"])
+        app.add_aliased_command(delete_item, "delete", aliases=["rm", "del"])
 
         result = cli_runner.invoke(app, ["ls"])
         assert "Listing..." in result.output
@@ -231,6 +243,11 @@ class TestMixingDecoratorAndProgrammatic:
         def list_items():
             print("Listing...")
 
+        @app.command_with_aliases("delete", aliases=["rm", "del"])
+        def delete_item():
+            """Delete an item."""
+            print("Deleting item...")
+
         # Add another alias programmatically
         app.add_alias("list", "l")
 
@@ -268,7 +285,7 @@ class TestMixingDecoratorAndProgrammatic:
 class TestHelpWithProgrammaticAPI:
     """Tests for help display with programmatic API"""
 
-    def test_help_shows_programmatic_commands(self, cli_runner):
+    def test_help_shows_programmatic_commands(self, cli_runner, clean_output):
         """Test that help shows programmatically registered commands"""
         app = AliasedTyper()
 
@@ -282,9 +299,12 @@ class TestHelpWithProgrammaticAPI:
 
         result = cli_runner.invoke(app, ["--help"])
         assert result.exit_code == 0
-        assert "list" in result.output
+        clean_result = clean_output(result.output)
 
-    def test_command_help_after_add_alias(self, cli_runner):
+        # Should show command and description
+        assert "list" in clean_result
+
+    def test_command_help_after_add_alias(self, cli_runner, clean_output):
         """Test that command help works after adding alias"""
         app = AliasedTyper()
 
@@ -303,12 +323,18 @@ class TestHelpWithProgrammaticAPI:
         # Help via primary name
         result = cli_runner.invoke(app, ["list", "--help"])
         assert result.exit_code == 0
-        assert "List all items" in result.output
+        clean_result = clean_output(result.output)
+
+        # Should show command description
+        assert "List all items" in clean_result
 
         # Help via newly added alias
         result = cli_runner.invoke(app, ["ls", "--help"])
         assert result.exit_code == 0
-        assert "List all items" in result.output
+        clean_result = clean_output(result.output)
+
+        # Should show command description
+        assert "List all items" in clean_result
 
 
 class TestErrorHandling:
@@ -546,3 +572,55 @@ class TestAliasReregistration:
         app.add_alias("list", "ls")
         result = cli_runner.invoke(app, ["ls"])
         assert result.exit_code == 0
+
+
+class TestRegularTyperWithMonkeyPatch:
+    """Tests for regular Typer instances with the monkey patch applied"""
+
+    def test_regular_typer_still_works(self, cli_runner):
+        """Test that regular Typer apps still work after AliasedTyper import"""
+        import typer
+
+        # Regular Typer (not AliasedTyper)
+        app = typer.Typer()
+
+        @app.command("list")
+        def list_items():
+            """List items."""
+            print("Listing items...")
+
+        @app.command("delete")
+        def delete_items():
+            """Delete items."""
+            print("Deleting items...")
+
+        # Should work as normal
+        result = cli_runner.invoke(app, ["list"])
+        assert result.exit_code == 0
+        assert "Listing items..." in result.output
+
+        result = cli_runner.invoke(app, ["delete"])
+        assert result.exit_code == 0
+        assert "Deleting items..." in result.output
+
+    def test_regular_typer_help_still_works(self, cli_runner):
+        """Test that regular Typer help text still works after AliasedTyper import"""
+        import typer
+
+        app = typer.Typer()
+
+        @app.command("list")
+        def list_items():
+            """List all items in the system."""
+            pass
+
+        @app.command("delete")
+        def delete_items():
+            """Delete items from the system."""
+            pass
+
+        result = cli_runner.invoke(app, ["--help"])
+        assert result.exit_code == 0
+        assert "list" in result.output
+        assert "delete" in result.output
+        assert "List all items" in result.output

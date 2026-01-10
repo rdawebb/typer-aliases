@@ -4,17 +4,18 @@ build-backend = "hatchling.build"
 
 [project]
 name = "typer-aliases"
-version = "0.1.0"
+version = "0.2.0"
 description = "Command aliases for Typer CLI applications"
 authors = [{name = "Rob Webb"}]
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 license = {text = "MIT"}
 keywords = ["typer", "cli", "aliases", "command-line", "click"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -26,14 +27,14 @@ classifiers = [
 ]
 dependencies = [
     "click>=8.0.0,<9.0.0",
-    "typer>=0.21.0"
+    "typer>=0.9.0"
 ]
 
 [project.optional-dependencies]
 dev = [
     "rust-just>=1.46.0,<2.0.0",
     "prek>=0.2.27,<1.0.0",
-    "pytest>=9.0.0,<10.0.0",
+    "pytest>=8.0.0,<10.0.0",
     "pytest-cov>=7.0.0,<8.0.0",
     "ruff>=0.14.0,<15.0.0",
     "ty>=0.0.10,<0.1.0"

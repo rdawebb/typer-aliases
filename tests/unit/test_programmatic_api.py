@@ -15,6 +15,10 @@ class TestAddAliasedCommand:
             """List items."""
             print("listing")
 
+        def delete_item():
+            """Delete items."""
+            pass
+
         app.add_aliased_command(list_items, "list", aliases=["ls", "l"])
 
         assert "list" in app._command_aliases
@@ -30,6 +34,10 @@ class TestAddAliasedCommand:
             """List items."""
             pass
 
+        def delete_item():
+            """Delete items."""
+            pass
+
         app.add_aliased_command(list_items, "list", aliases=None)
 
         assert "list" not in app._command_aliases
@@ -41,6 +49,10 @@ class TestAddAliasedCommand:
 
         def list_items():
             """List items."""
+            pass
+
+        def delete_item():
+            """Delete items."""
             pass
 
         app.add_aliased_command(list_items, aliases=["ls"])
@@ -55,6 +67,10 @@ class TestAddAliasedCommand:
 
         def list_items():
             """List items."""
+            pass
+
+        def delete_item():
+            """Delete items."""
             pass
 
         cmd = app.add_aliased_command(
@@ -112,6 +128,11 @@ class TestAddAlias:
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():
             """List items."""
+            pass
+
+        @app.command_with_aliases("delete", aliases=["rm"])
+        def delete_item():
+            """Delete items."""
             pass
 
         # Add another alias
@@ -201,6 +222,10 @@ class TestRemoveAlias:
         def list_items():
             pass
 
+        @app.command_with_aliases("delete", aliases=["rm"])
+        def delete_item():
+            pass
+
         result = app.remove_alias("ls")
 
         assert result is True
@@ -215,6 +240,10 @@ class TestRemoveAlias:
         def list_items():
             pass
 
+        @app.command("delete")
+        def delete_item():
+            pass
+
         result = app.remove_alias("nonexistent")
 
         assert result is False
@@ -225,6 +254,10 @@ class TestRemoveAlias:
 
         @app.command_with_aliases("list", aliases=["ls", "l", "dir"])
         def list_items():
+            pass
+
+        @app.command_with_aliases("delete", aliases=["rm"])
+        def delete_item():
             pass
 
         app.remove_alias("l")
@@ -242,6 +275,10 @@ class TestRemoveAlias:
         def list_items():
             pass
 
+        @app.command_with_aliases("delete", aliases=["rm"])
+        def delete_item():
+            pass
+
         app.remove_alias("ls")
 
         # Command should be removed from _command_aliases when no aliases left
@@ -256,6 +293,10 @@ class TestRemoveAlias:
         def list_items():
             pass
 
+        @app.command_with_aliases("delete", aliases=["rm"])
+        def delete_item():
+            pass
+
         # Should remove regardless of case
         result = app.remove_alias("LS")
 
@@ -268,6 +309,10 @@ class TestRemoveAlias:
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():
+            pass
+
+        @app.command_with_aliases("delete", aliases=["rm"])
+        def delete_item():
             pass
 
         result1 = app.remove_alias("ls")
@@ -288,6 +333,10 @@ class TestGetAliases:
         def list_items():
             pass
 
+        @app.command("delete")
+        def delete_item():
+            pass
+
         aliases = app.get_aliases("list")
 
         assert aliases == ["ls", "l", "dir"]
@@ -298,6 +347,10 @@ class TestGetAliases:
 
         @app.command("list")
         def list_items():
+            pass
+
+        @app.command("delete")
+        def delete_item():
             pass
 
         aliases = app.get_aliases("list")
@@ -318,6 +371,10 @@ class TestGetAliases:
 
         @app.command_with_aliases("list", aliases=["ls", "l"])
         def list_items():
+            pass
+
+        @app.command("delete")
+        def delete_item():
             pass
 
         aliases = app.get_aliases("list")
@@ -352,6 +409,10 @@ class TestGetAliases:
 
         @app.command_with_aliases("list", aliases=["ls", "l", "dir"])
         def list_items():
+            pass
+
+        @app.command("delete")
+        def delete_item():
             pass
 
         app.remove_alias("l")
@@ -403,13 +464,17 @@ class TestListCommandsWithAliases:
         def list_items():
             pass
 
+        @app.command_with_aliases("delete", aliases=["rm"])
+        def delete_item():
+            pass
+
         mapping = app.list_commands_with_aliases()
         mapping["list"].append("modified")
         mapping["new"] = ["test"]
 
         # Original should be unchanged
         original_mapping = app.list_commands_with_aliases()
-        assert original_mapping == {"list": ["ls"]}
+        assert original_mapping == {"list": ["ls"], "delete": ["rm"]}
 
     def test_list_excludes_commands_without_aliases(self):
         """Test that commands without aliases are excluded."""
@@ -463,7 +528,11 @@ class TestProgrammaticAPIMixedUsage:
         def list_items():
             pass
 
+        def delete_item():
+            pass
+
         app.add_aliased_command(list_items, "list", aliases=["ls"])
+        app.add_aliased_command(delete_item, "delete", aliases=["rm"])
         app.add_alias("list", "l")
 
         aliases = app.get_aliases("list")
@@ -475,6 +544,10 @@ class TestProgrammaticAPIMixedUsage:
 
         @app.command_with_aliases("list", aliases=["ls", "l"])
         def list_items():
+            pass
+
+        @app.command_with_aliases("delete", aliases=["rm"])
+        def delete_item():
             pass
 
         result = app.remove_alias("ls")

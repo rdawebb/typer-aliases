@@ -1,6 +1,7 @@
 """Core AliasedTyper class extending typer.Typer with alias support"""
 
-from typing import Any, Callable, Optional, Protocol, cast
+import re
+from typing import Any, Callable, Optional, Protocol, Union, cast
 
 import typer
 import typer.main
@@ -14,7 +15,7 @@ class HasName(Protocol):
     __name__: str
 
 
-class AliasedGroup(Group):
+class AliasedGroup(TyperGroup):
     """Custom Click Group that handles command aliases"""
 
     def __init__(
@@ -45,11 +46,6 @@ class AliasedGroup(Group):
         if self.aliased_typer is None:
             return super().get_command(ctx, cmd_name)
 
-        # Check if this name is a removed alias
-        normalised_name = self.aliased_typer._normalise_name(cmd_name)
-        if normalised_name in self.aliased_typer._removed_aliases:
-            return None
-
         # Try to resolve as an active alias first
         primary_cmd = self.aliased_typer._resolve_alias(cmd_name)
         if primary_cmd is not None:
@@ -59,6 +55,89 @@ class AliasedGroup(Group):
         if cmd is not None:
             return cmd
 
+        return None
+
+    def format_help(self, ctx: Context, formatter: Any) -> None:
+        """Override TyperGroup's format_help to inject aliases into Rich output
+
+        Args:
+            ctx: The Click context
+            formatter: The Click HelpFormatter instance
+        """
+        # Check if Rich formatting is enabled
+        if not hasattr(self, "rich_markup_mode") or self.rich_markup_mode is None:
+            return super().format_help(ctx, formatter)
+
+        from typer import rich_utils
+
+        # Store original _print_commands_panel
+        original_print = rich_utils._print_commands_panel
+
+        def custom_print_commands_panel(
+            *,
+            name: str,
+            commands: list[Command],
+            markup_mode: Any,
+            console: Any,
+            cmd_len: int,
+        ) -> None:
+            """Wrapper that modifies command names to include aliases
+
+            Args:
+                name: The name of the command group
+                commands: The list of commands in the group
+                markup_mode: The markup mode for the console output
+                console: The console instance for output
+                cmd_len: The length of the longest command name
+            """
+            modified_commands = []
+            max_len = cmd_len
+
+            for command in commands:
+                if (
+                    self.aliased_typer
+                    and self.aliased_typer._show_aliases_in_help
+                    and command.name in self.aliased_typer._command_aliases
+                ):
+                    from .format import format_command_with_aliases
+
+                    formatted_name = format_command_with_aliases(
+                        command.name,
+                        self.aliased_typer._command_aliases[command.name],
+                        display_format=self.aliased_typer._alias_display_format,
+                        max_num=self.aliased_typer._max_num_aliases,
+                        separator=self.aliased_typer._alias_separator,
+                    )
+
+                    # Longest formatted name for correct column width
+                    max_len = max(max_len, len(formatted_name))
+
+                    # Temporary command object with the formatted name
+                    cmd_copy = command
+                    cmd_copy.name = formatted_name
+
+                    modified_commands.append(cmd_copy)
+                else:
+                    modified_commands.append(command)
+
+            # Call the original with modified commands & cmd_len
+            original_print(
+                name=name,
+                commands=modified_commands,
+                markup_mode=markup_mode,
+                console=console,
+                cmd_len=max_len,
+            )
+
+        # Temporarily replace the function
+        rich_utils._print_commands_panel = custom_print_commands_panel  # type: ignore[assignment]
+        try:
+            # Call parent's format_help with custom_print_commands_panel
+            super().format_help(ctx, formatter)
+        finally:
+            # Restore original function
+            rich_utils._print_commands_panel = original_print  # type: ignore[assignment]
+
 
 # Store original function
 _original_get_group_from_info = typer.main.get_group_from_info
@@ -67,7 +146,7 @@ _original_get_group_from_info = typer.main.get_group_from_info
 def _aliased_get_group_from_info(
     typer_info: "typer.main.TyperInfo",
     **kwargs: Any,
-) -> AliasedGroup | TyperGroup:
+) -> Union[AliasedGroup, TyperGroup]:
     """Custom version of get_group_from_info that returns AliasedGroup for AliasedTyper instances
 
     Args:
@@ -96,6 +175,8 @@ def _aliased_get_group_from_info(
             result_callback=group.result_callback,
             context_settings=group.context_settings,
             aliased_typer=aliased_typer,
+            rich_markup_mode=group.rich_markup_mode,
+            rich_help_panel=group.rich_help_panel,
         )
 
         for name, cmd in group.commands.items():
@@ -103,6 +184,7 @@ def _aliased_get_group_from_info(
 
         return aliased_group
 
+    # Standard TyperGroup
     return group
 
 
@@ -116,28 +198,46 @@ class AliasedTyper(typer.Typer):
     def __init__(
         self,
         *args: Any,
-        alias_case_sensitive: bool = True,
+        alias_case_sensitive: Optional[bool] = None,
         show_aliases_in_help: bool = True,
+        alias_display_format: str = "({aliases})",
+        alias_separator: str = ", ",
+        max_num_aliases: int = 3,
         **kwargs: Any,
     ) -> None:
         """Initialise AliasedTyper
 
         Args:
             *args: Positional arguments for Typer
-            alias_case_sensitive: Whether aliases are case sensitive
+            alias_case_sensitive: Whether aliases are case sensitive. If None (default), will match
+                Typer's case_sensitive setting from context_settings (defaults to True)
             show_aliases_in_help: Whether to show aliases in help
+            alias_display_format: Format string for displaying aliases in help
+                Must include the placeholder '{aliases}'
+            alias_separator: Separator for displaying aliases in help (default: ', ')
+            max_num_aliases: Maximum number of aliases to display before truncating with '+ N more'
             **kwargs: Keyword arguments for Typer
         """
+        kwargs.setdefault("rich_markup_mode", "rich")
+        kwargs.setdefault("rich_help_panel", True)
         super().__init__(*args, **kwargs)
 
-        self._alias_case_sensitive = alias_case_sensitive
+        # Sync with Typer's case_sensitive setting if not explicitly set
+        if alias_case_sensitive is None:
+            context_settings = kwargs.get("context_settings") or {}
+            typer_case_sensitive = context_settings.get("case_sensitive", True)
+            self._alias_case_sensitive = typer_case_sensitive
+        else:
+            self._alias_case_sensitive = alias_case_sensitive
+
         self._show_aliases_in_help = show_aliases_in_help
+        self._alias_display_format = alias_display_format
+        self._alias_separator = alias_separator
+        self._max_num_aliases = max_num_aliases
 
         # Mapping of command names to aliases (O(1) lookup)
         self._command_aliases: dict[str, list[str]] = {}
         self._alias_to_command: dict[str, str] = {}
-        # Track removed aliases so they don't resolve
-        self._removed_aliases: set[str] = set()
 
     def _normalise_name(self, name: str) -> str:
         """Normalise command/alias name based on case sensitivity
@@ -160,6 +260,17 @@ class AliasedTyper(typer.Typer):
         Raises:
             ValueError: If the alias conflicts with an existing command/alias
         """
+        if not alias or not isinstance(alias, str):
+            raise ValueError("Alias must be a non-empty string")
+
+        if any(c.isspace() for c in alias):
+            raise ValueError("Alias cannot contain whitespace")
+
+        if not re.match(r"^[\w\-]+$", alias, re.UNICODE):
+            raise ValueError(
+                "Alias must only contain alphanumeric characters, dashes, and underscores (Unicode allowed)"
+            )
+
         normalised_alias = self._normalise_name(alias)
         normalised_cmd = self._normalise_name(command_name)
 
@@ -175,10 +286,6 @@ class AliasedTyper(typer.Typer):
             raise ValueError(
                 f"Alias '{alias}' is already registered for command '{existing_cmd}'"
             )
-
-        # Allow re-registering if it was previously removed
-        if normalised_alias in self._removed_aliases:
-            self._removed_aliases.discard(normalised_alias)
 
         # Register the alias
         self._alias_to_command[normalised_alias] = command_name
@@ -215,9 +322,6 @@ class AliasedTyper(typer.Typer):
 
         for alias in aliases:
             self._register_alias(name, alias)
-            alias_kwargs = kwargs.copy()
-            alias_kwargs["hidden"] = True
-            self.command(alias, **alias_kwargs)(func)
 
         click_obj = typer.main.get_command(self)
         if isinstance(click_obj, Group):
@@ -237,8 +341,6 @@ class AliasedTyper(typer.Typer):
             The primary command name if found, or None if not found or removed
         """
         normalised_name = self._normalise_name(name)
-        if normalised_name in self._removed_aliases:
-            return None
 
         return self._alias_to_command.get(normalised_name)
 
@@ -266,24 +368,21 @@ class AliasedTyper(typer.Typer):
         effective_name = primary_cmd if primary_cmd is not None else cmd_name
 
         # Single command apps
-        if hasattr(self, "_command") and self._command is not None:
+        if hasattr(self, "_command"):
             command = self._command
             if command.name == effective_name:
                 return command
             return None
 
         # Multi-command apps
-        if hasattr(self, "_group") and self._group is not None:
-            group = cast(Group, self._group)
-            if effective_name in group.commands:
-                return group.commands[effective_name]
-            return group.get_command(ctx, effective_name)
-
-        return None
+        group = cast(Group, self._group)
+        if effective_name in group.commands:
+            return group.commands[effective_name]
+        return group.get_command(ctx, effective_name)
 
     def command_with_aliases(
         self,
-        name: Optional[str | Callable[..., Any]] = None,
+        name: Optional[Union[str, Callable[..., Any]]] = None,
         *,
         aliases: Optional[list[str]] = None,
         **kwargs: Any,
@@ -381,12 +480,9 @@ class AliasedTyper(typer.Typer):
             raise ValueError(f"Command '{command_name}' does not exist")
 
         self._register_alias(command_name, alias)
-        self.command(alias, hidden=True)(existing_command.callback)
 
     def remove_alias(self, alias: str) -> bool:
         """Programmatically remove an alias from an existing command
-
-        This removes the alias from the tracking list and marks it as removed, preventing it from being invoked, as Click doesn't provide an API for removing commands
 
         Args:
             alias: The alias to remove
@@ -401,9 +497,6 @@ class AliasedTyper(typer.Typer):
 
         primary_name = self._alias_to_command[normalised_alias]
         del self._alias_to_command[normalised_alias]
-
-        # Mark this alias as removed so it won't resolve
-        self._removed_aliases.add(normalised_alias)
 
         if primary_name in self._command_aliases:
             try:

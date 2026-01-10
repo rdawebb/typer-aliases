@@ -36,7 +36,7 @@ class TestNameNormalisation:
         assert app._normalise_name("list") == "list"
 
     def test_normalise_case_insensitive(self):
-        """Test name normalization without case sensitivity"""
+        """Test name normalisation without case sensitivity"""
         app = AliasedTyper(alias_case_sensitive=False)
         assert app._normalise_name("List") == "list"
         assert app._normalise_name("LIST") == "list"
@@ -416,3 +416,231 @@ class TestAliasedGroup:
         ctx = Context(group)
 
         assert group.get_command(ctx, "unknown") is None
+
+    def test_get_command_without_aliased_typer(self):
+        """Test AliasedGroup.get_command when aliased_typer is None"""
+        from click import Context
+        from typer_aliases.core import AliasedGroup
+
+        group = AliasedGroup(aliased_typer=None)
+        ctx = Context(group)
+
+        # Should fall back to parent's get_command
+        result = group.get_command(ctx, "unknown")
+        # Should return None as no commands are registered
+        assert result is None
+
+
+class TestRegisterAliasValidation:
+    """Tests for alias registration input validation"""
+
+    def test_register_alias_empty_string(self):
+        """Test that empty string alias raises ValueError"""
+        app = AliasedTyper()
+
+        with pytest.raises(ValueError, match="Alias must be a non-empty string"):
+            app._register_alias("list", "")
+
+    def test_register_alias_none_value(self):
+        """Test that None alias raises ValueError"""
+        app = AliasedTyper()
+
+        with pytest.raises(ValueError, match="Alias must be a non-empty string"):
+            app._register_alias("list", None)  # type: ignore[arg-type]
+
+    def test_register_alias_non_string_type(self):
+        """Test that non-string alias raises ValueError"""
+        app = AliasedTyper()
+
+        with pytest.raises(ValueError, match="Alias must be a non-empty string"):
+            app._register_alias("list", 123)  # type: ignore[arg-type]
+
+    def test_register_alias_with_whitespace(self):
+        """Test that alias with whitespace raises ValueError"""
+        app = AliasedTyper()
+
+        with pytest.raises(ValueError, match="Alias cannot contain whitespace"):
+            app._register_alias("list", "l s")
+
+    def test_register_alias_with_tabs(self):
+        """Test that alias with tabs raises ValueError"""
+        app = AliasedTyper()
+
+        with pytest.raises(ValueError, match="Alias cannot contain whitespace"):
+            app._register_alias("list", "l\ts")
+
+    def test_register_alias_with_invalid_characters(self):
+        """Test that alias with invalid characters raises ValueError"""
+        app = AliasedTyper()
+
+        with pytest.raises(
+            ValueError,
+            match="Alias must only contain alphanumeric characters, dashes, and underscores",
+        ):
+            app._register_alias("list", "l@s")
+
+    def test_register_alias_with_special_characters(self):
+        """Test that alias with special characters raises ValueError"""
+        app = AliasedTyper()
+
+        with pytest.raises(
+            ValueError,
+            match="Alias must only contain alphanumeric characters, dashes, and underscores",
+        ):
+            app._register_alias("list", "l$s")
+
+    def test_register_alias_valid_with_dashes(self):
+        """Test that alias with dashes is valid"""
+        app = AliasedTyper()
+        app._register_alias("list", "list-all")
+
+        assert app._alias_to_command["list-all"] == "list"
+
+    def test_register_alias_valid_with_underscores(self):
+        """Test that alias with underscores is valid"""
+        app = AliasedTyper()
+        app._register_alias("list", "list_all")
+
+        assert app._alias_to_command["list_all"] == "list"
+
+    def test_register_alias_valid_with_unicode(self):
+        """Test that alias with unicode characters is valid"""
+        app = AliasedTyper()
+        app._register_alias("list", "liés")
+
+        assert app._alias_to_command["liés"] == "list"
+
+
+class TestAddAliasToSingleCommandApp:
+    """Tests for add_alias with single-command applications"""
+
+    def test_add_alias_to_single_command_app_raises(self):
+        """Test that adding alias to single-command app raises ValueError"""
+        app = AliasedTyper()
+
+        @app.command()
+        def main():
+            """Main command."""
+            pass
+
+        with pytest.raises(
+            ValueError, match="Cannot add aliases to single-command applications"
+        ):
+            app.add_alias("main", "m")
+
+    def test_add_alias_to_nonexistent_command_raises(self):
+        """Test that adding alias to non-existent command raises ValueError"""
+        app = AliasedTyper()
+
+        @app.command("list")
+        def list_items():
+            """List items."""
+            pass
+
+        @app.command("delete")
+        def delete_items():
+            """Delete items."""
+            pass
+
+        with pytest.raises(ValueError, match="Command 'nonexistent' does not exist"):
+            app.add_alias("nonexistent", "nx")
+
+
+class TestRemoveAliasEdgeCases:
+    """Tests for edge cases in remove_alias"""
+
+    def test_remove_alias_when_primary_command_has_no_aliases_dict(self):
+        """Test remove_alias when primary command is not in _command_aliases dict"""
+        app = AliasedTyper()
+
+        @app.command("list")
+        def list_items():
+            """List items."""
+            pass
+
+        @app.command("delete")
+        def delete_items():
+            """Delete items."""
+            pass
+
+        app._register_command_with_aliases(list_items, "list", aliases=["ls"])
+
+        # Manually add an alias without registering the command
+        app._alias_to_command["orphan"] = "delete"
+
+        # Should return True, but not crash when primary isn't in _command_aliases
+        result = app.remove_alias("orphan")
+        assert result is True
+
+
+class TestGetCommandEdgeCases:
+    """Tests for edge cases in get_command"""
+
+    def test_get_command_with_fresh_app_single_command(self):
+        """Test get_command on fresh single-command app"""
+        from unittest.mock import MagicMock
+
+        app = AliasedTyper()
+
+        def main():
+            """Main command."""
+            pass
+
+        app._register_command_with_aliases(main, "main", aliases=["m"])
+
+        ctx = MagicMock()
+
+        # First call should trigger CLI build
+        cmd = app.get_command(ctx, "main")
+        assert cmd is not None
+        assert cmd.name == "main"
+
+    def test_get_command_returns_none_for_invalid_command(self):
+        """Test that get_command returns None for truly invalid commands"""
+        from unittest.mock import MagicMock
+
+        app = AliasedTyper()
+
+        @app.command("list")
+        def list_items():
+            """List items."""
+            pass
+
+        ctx = MagicMock()
+
+        # Get a valid command first to initialise _group
+        app.get_command(ctx, "list")
+
+        # Invalid command, should return None
+        cmd = app.get_command(ctx, "invalid_command_xyz")
+        assert cmd is None
+
+    def test_get_command_with_no_group_or_command_initialised(self):
+        """Test get_command when neither _group nor _command are set"""
+        from unittest.mock import MagicMock, patch
+
+        app = AliasedTyper()
+
+        @app.command("list")
+        def list_items():
+            """List items."""
+            pass
+
+        ctx = MagicMock()
+
+        # Patch get_command to return an object without attributes
+        with patch("typer.main.get_command") as mock_get_cmd:
+            # Return a mock that doesn't have 'commands' attribute
+            mock_obj = MagicMock()
+            del mock_obj.commands  # Remove the commands attribute
+            mock_get_cmd.return_value = mock_obj
+
+            # Delete cached attributes to force re-initialisation
+            if hasattr(app, "_group"):
+                delattr(app, "_group")
+            if hasattr(app, "_command"):
+                delattr(app, "_command")
+
+            # Should return None when neither condition is met
+            result = app.get_command(ctx, "unknown")
+            assert result is None

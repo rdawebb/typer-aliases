@@ -1,1 +1,1 @@
-"""Integration tests for the typer-aliases package"""
+"""Integration tests for typer-aliases"""

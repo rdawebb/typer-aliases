@@ -1,7 +1,7 @@
 """Basic usage example for typer-aliases
 
 This example demonstrates the decorator syntax for creating
-commands with aliases using typer-aliases
+commands with aliases using typer-aliases. Run with '--help' to see how aliases are displayed in the help text.
 """
 
 from typer_aliases import AliasedTyper
@@ -18,7 +18,7 @@ def list_items():
     print("- Item 3")
 
 
-@app.command_with_aliases("delete", aliases=["rm", "remove"])
+@app.command_with_aliases("delete", aliases=["rm", "del"])
 def delete_item(name: str):
     """Delete an item by name."""
     print(f"Deleting {name}...")
