@@ -18,6 +18,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Added `.test-env` to `.gitignore` for isolated test environments
 - Fixed README.md filename casing in `pyproject.toml`
 
+### Build
+
+- `py.typed` marker file for PEP 561 type hinting support
+
 
 ## [0.2.0] - 2026/01/10
 
@@ -92,5 +96,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Initial project structure with Makefile and development tooling
 
 
-[0.2.0]: https://github.com/rdawebb/typer-aliases/compare/v0.1.0a1...v0.2.0b1
+[0.2.0]: https://github.com/rdawebb/typer-aliases/compare/v0.1.0a1...v0.2.0
 [0.1.0]: https://github.com/rdawebb/typer-aliases/releases/tag/v0.1.0a1
