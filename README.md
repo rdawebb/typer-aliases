@@ -1,19 +1,19 @@
-# typer-aliases
+# typer-extensions
 
 **Command aliases for Typer CLI applications with grouped help text display**
 
-[![CI](https://github.com/rdawebb/typer-aliases/workflows/test/badge.svg)](https://github.com/rdawebb/typer-aliases/actions)
-[![PyPI](https://img.shields.io/pypi/v/typer-aliases.svg)](https://pypi.org/project/typer-aliases/)
-[![Python Versions](https://img.shields.io/pypi/pyversions/typer-aliases.svg)](https://pypi.org/project/typer-aliases/)
+[![CI](https://github.com/rdawebb/typer-extensions/workflows/test/badge.svg)](https://github.com/rdawebb/typer-extensions/actions)
+[![PyPI](https://img.shields.io/pypi/v/typer-extensions.svg)](https://pypi.org/project/typer-extensions/)
+[![Python Versions](https://img.shields.io/pypi/pyversions/typer-extensions.svg)](https://pypi.org/project/typer-extensions/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
 
 ## Overview
 
-`typer-aliases` extends [Typer](https://typer.tiangolo.com/) to provide first-class drop-in support for command aliases. Instead of duplicating commands, hiding commands, or maintaining wrapper functions, define aliases directly and have them displayed cleanly in help text.
+`typer-extensions` extends [Typer](https://typer.tiangolo.com/) to provide simple drop-in support for command aliases. Instead of duplicating commands, hiding commands, or maintaining wrapper functions, define aliases directly and have them displayed cleanly in help text.
 
-100% backwards compatible with Typer
+100% backwards compatible with Typer & existing Typer apps!
 
 ### The Problem
 
@@ -52,12 +52,12 @@ Commands:
 
 ### The Solution
 
-With `typer-aliases`:
+With `typer-extensions`:
 
 ```python
-from typer_aliases import AliasedTyper
+from typer_extensions import ExtendedTyper
 
-app = AliasedTyper()
+app = ExtendedTyper()
 
 @app.command_with_aliases("list", aliases=["ls", "l"])
 def list_items():
@@ -92,7 +92,7 @@ Commands:
 
 🔄 **Fully backwards compatible** - Works with all Typer/Click features and existing Typer apps
 
-✅ **Shell completion ready** - Alias support doesn't interfere with your shell completion setup
+✅ **Shell completion ready** - Alias support doesn't interfere with existing shell completion
 
 🧪 **Well-tested** - Tested on Python 3.9-3.14 with 100% test coverage
 
@@ -101,7 +101,7 @@ Commands:
 ## Installation
 
 ```bash
-pip install typer-aliases
+pip install typer-extensions
 ```
 
 **Requirements:**
@@ -116,9 +116,9 @@ pip install typer-aliases
 ### Basic Usage
 
 ```python
-from typer_aliases import AliasedTyper
+from typer_extensions import ExtendedTyper
 
-app = AliasedTyper()
+app = ExtendedTyper()
 
 @app.command_with_aliases("list", aliases=["ls", "l"])
 def list_items():
@@ -159,12 +159,12 @@ Have an existing Typer project? Add alias support without changing your code:
 from typer import Typer
 app = Typer()
 
-# After (with typer-aliases)
-from typer_aliases import AliasedTyper
-app = AliasedTyper()
+# After (with typer-extensions)
+from typer_extensions import ExtendedTyper
+app = ExtendedTyper()
 
 # That's it! Everything else stays the same.
-# Your existing commands, shell completion and help text configuration still work exactly as before.
+# Existing commands, shell completion and help text configuration still work exactly as before.
 ```
 
 Once migrated, you can add aliases to new commands using `@app.command_with_aliases()`, or to existing commands using the programmatic API.
@@ -187,7 +187,7 @@ aliases = app.get_aliases("list")  # ["ls", "l"]
 
 **Custom help formatting:**
 ```python
-app = AliasedTyper(
+app = ExtendedTyper(
     alias_display_format="[{aliases}]",   # Use brackets
     alias_separator=" | ",                # Pipe separator
     max_aliases_inline=2,                 # Show max 2, then "+N more"
@@ -223,6 +223,7 @@ All examples are in the [`examples/`](examples/) directory:
 - **[advanced_usage.py](examples/advanced_usage.py)** - Git-like CLI with options
 - **[programmatic_usage.py](examples/programmatic_usage.py)** - Dynamic alias management
 - **[help_formatting.py](examples/help_formatting.py)** - Customising help display
+- **[argument_option_usage.py](examples/argument_option_usage.py)** - Using Typer's Argument & Option
 
 **Run any example:**
 ```bash
@@ -298,7 +299,7 @@ app.list_commands_with_aliases() → dict  # All mappings
 
 ### Configuration
 ```python
-AliasedTyper(
+ExtendedTyper(
     alias_case_sensitive=None,           # Case-sensitive matching (default True per Typer)
     show_aliases_in_help=True,           # Display aliases in help
     alias_display_format="({aliases})",  # Display format
@@ -316,8 +317,8 @@ AliasedTyper(
 **Standard setup with pip:**
 
 ```bash
-git clone https://github.com/rdawebb/typer-aliases.git
-cd typer-aliases
+git clone https://github.com/rdawebb/typer-extensions.git
+cd typer-extensions
 python -m venv venv
 source venv/bin/activate  # or venv\Scripts\activate on Windows
 pip install -e ".[dev]"
@@ -326,8 +327,8 @@ pip install -e ".[dev]"
 **Or with uv (recommended):**
 
 ```bash
-git clone https://github.com/rdawebb/typer-aliases.git
-cd typer-aliases
+git clone https://github.com/rdawebb/typer-extensions.git
+cd typer-extensions
 uv sync --all-extras
 source .venv/bin/activate
 ```
@@ -379,7 +380,7 @@ Contributions are welcome! Please open an issue, ask a question, or submit a pul
 
 ## Project Status
 
-**Current Version:** 0.2.0 (Beta)
+**Current Version:** 0.2.1 (Beta)
 
 ✅ **Core Features Complete:**
 - Alias registration (decorator + programmatic)
@@ -388,20 +389,23 @@ Contributions are welcome! Please open an issue, ask a question, or submit a pul
 - Full test coverage
 
 🚧 **In Development:**
+- Dynamic config file loading with import/export
+- Shell completion enhancement and typo suggestions
 - Documentation site
-- Additional examples
 - Performance optimisations
 
 📋 **Planned Features:**
-- Dynamic config file loading with import/export
-- Shell completion enhancements
+- Shared & chained subcommand aliases
 - Per-alias help text
+- Dataclass, Pydantic & Attrs support
+- Custom themes and help text formatting
+- Argument & Option customisation
 
 See [CHANGELOG.md](CHANGELOG.md) for version history.
 
 ---
 
-## Why typer-aliases?
+## Why typer-extensions?
 
 **For Users:**
 - ⚡ Faster workflows with short aliases
@@ -445,16 +449,16 @@ Inspired by Git's command aliasing and various CLI tools that make shortcuts fee
 
 ## Support
 
-- 🐛 **Issues:** [GitHub Issues](https://github.com/rdawebb/typer-aliases/issues)
-- 💬 **Discussions:** [GitHub Discussions](https://github.com/rdawebb/typer-aliases/discussions)
+- 🐛 **Issues:** [GitHub Issues](https://github.com/rdawebb/typer-extensions/issues)
+- 💬 **Discussions:** [GitHub Discussions](https://github.com/rdawebb/typer-extensions/discussions)
 - 📧 **Contact:** Create an issue for questions
 
 ---
 
 ## Links
 
-- **GitHub:** https://github.com/rdawebb/typer-aliases
-- **PyPI:** https://pypi.org/project/typer-aliases/
+- **GitHub:** https://github.com/rdawebb/typer-extensions
+- **PyPI:** https://pypi.org/project/typer-extensions/
 - **Changelog:** [CHANGELOG.md](CHANGELOG.md)
 
 ---

@@ -1,6 +1,6 @@
 # Best Practices
 
-Recommendations and tips for using typer-aliases effectively.
+Recommendations and tips for using typer-extensions effectively.
 
 ---
 

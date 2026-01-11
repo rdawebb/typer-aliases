@@ -1,7 +1,7 @@
 """Integration tests for decorator usage in real CLI scenarios"""
 
 import typer
-from typer_aliases import AliasedTyper
+from typer_extensions import ExtendedTyper
 
 
 class TestDecoratorInvocation:
@@ -9,7 +9,7 @@ class TestDecoratorInvocation:
 
     def test_invoke_decorated_command_by_name(self, cli_runner):
         """Test invoking decorated command by primary name"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls", "l"])
         def list_items():
@@ -27,7 +27,7 @@ class TestDecoratorInvocation:
 
     def test_invoke_decorated_command_by_alias(self, cli_runner):
         """Test invoking decorated command by alias"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls", "l"])
         def list_items():
@@ -49,7 +49,7 @@ class TestDecoratorInvocation:
 
     def test_invoke_bare_decorator(self, cli_runner, clean_output):
         """Test invoking command decorated without parentheses"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases
         def hello():
@@ -66,7 +66,7 @@ class TestDecoratorInvocation:
 
     def test_bare_decorator_with_aliases(self, cli_runner, clean_output):
         """Test invoking command decorated without parentheses and with aliases"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases
         def hello():
@@ -92,7 +92,7 @@ class TestDecoratorWithTyperFeatures:
 
     def test_decorator_with_argument(self, cli_runner):
         """Test decorated command with argument"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("greet", aliases=["hi", "hello"])
         def greet(name: str):
@@ -115,7 +115,7 @@ class TestDecoratorWithTyperFeatures:
 
     def test_decorator_with_option(self, cli_runner):
         """Test decorated command with option."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items(verbose: bool = typer.Option(False, "--verbose", "-v")):
@@ -145,7 +145,7 @@ class TestDecoratorWithTyperFeatures:
 
     def test_decorator_with_multiple_arguments(self, cli_runner):
         """Test decorated command with multiple arguments"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("copy", aliases=["cp"])
         def copy_file(source: str, dest: str):
@@ -163,7 +163,7 @@ class TestDecoratorWithTyperFeatures:
 
     def test_decorator_with_typer_context(self, cli_runner, clean_output):
         """Test decorated command with Typer context"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("info", aliases=["i"])
         def show_info(ctx: typer.Context):
@@ -190,7 +190,7 @@ class TestDecoratorHelpDisplay:
 
     def test_main_help_shows_decorated_commands(self, cli_runner, clean_output):
         """Test that main help shows decorated commands"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():
@@ -214,7 +214,7 @@ class TestDecoratorHelpDisplay:
 
     def test_command_help_via_primary(self, cli_runner, clean_output):
         """Test command help via primary name"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items(verbose: bool = typer.Option(False, "--verbose")):
@@ -234,7 +234,7 @@ class TestDecoratorHelpDisplay:
 
     def test_command_help_via_alias(self, cli_runner, clean_output):
         """Test command help via alias"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items(verbose: bool = typer.Option(False, "--verbose")):
@@ -258,7 +258,7 @@ class TestDecoratorHelpDisplay:
         """Test that alias commands don't appear separately in help"""
         import re
 
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls", "l"])
         def list_items():
@@ -292,7 +292,7 @@ class TestDecoratorRealWorldScenarios:
 
     def test_git_like_cli(self, cli_runner):
         """Test a Git-like CLI with common aliases"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("checkout", aliases=["co"])
         def checkout(branch: str):
@@ -323,7 +323,7 @@ class TestDecoratorRealWorldScenarios:
 
     def test_package_manager_cli(self, cli_runner):
         """Test a package manager-like CLI"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("install", aliases=["i", "add"])
         def install(package: str):
@@ -358,7 +358,7 @@ class TestDecoratorErrorHandling:
 
     def test_missing_required_argument(self, cli_runner):
         """Test error when required argument is missing"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("greet", aliases=["hi"])
         def greet(name: str):
@@ -377,7 +377,7 @@ class TestDecoratorErrorHandling:
 
     def test_invalid_alias_invocation(self, cli_runner):
         """Test invoking non-existent alias"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():
@@ -400,7 +400,7 @@ class TestDecoratorWithStandardCommands:
 
     def test_both_decorator_types_work(self, cli_runner):
         """Test using both decorator styles in same app."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():
@@ -424,7 +424,7 @@ class TestDecoratorWithStandardCommands:
 
     def test_help_shows_both_command_types(self, cli_runner, clean_output):
         """Test that help shows both types of commands"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():

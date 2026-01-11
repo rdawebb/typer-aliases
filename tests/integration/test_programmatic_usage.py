@@ -1,7 +1,7 @@
 """Integration tests for programmatic API methods"""
 
 import pytest
-from typer_aliases import AliasedTyper
+from typer_extensions import ExtendedTyper
 
 
 class TestProgrammaticCommandInvocation:
@@ -9,7 +9,7 @@ class TestProgrammaticCommandInvocation:
 
     def test_invoke_programmatic_command(self, cli_runner):
         """Test invoking command registered programmatically"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         def list_items():
             print("Listing items...")
@@ -30,7 +30,7 @@ class TestProgrammaticCommandInvocation:
 
     def test_invoke_after_add_alias(self, cli_runner):
         """Test that newly added alias works for invocation"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -54,7 +54,7 @@ class TestProgrammaticCommandInvocation:
 
     def test_invoke_fails_after_remove_alias(self, cli_runner):
         """Test that removed alias no longer works"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls", "l"])
         def list_items():
@@ -85,7 +85,7 @@ class TestProgrammaticWithArguments:
 
     def test_programmatic_command_with_argument(self, cli_runner):
         """Test programmatically registered command with argument"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         def greet(name: str):
             print(f"Hello, {name}!")
@@ -108,7 +108,7 @@ class TestProgrammaticWithArguments:
         """Test programmatically registered command with option"""
         import typer
 
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         def list_items(verbose: bool = typer.Option(False, "--verbose", "-v")):
             if verbose:
@@ -135,7 +135,7 @@ class TestDynamicAliasManagement:
 
     def test_dynamic_alias_workflow(self, cli_runner):
         """Test a complete workflow of dynamic alias management."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -170,7 +170,7 @@ class TestDynamicAliasManagement:
 
     def test_plugin_system_simulation(self, cli_runner):
         """Test simulating a plugin system with dynamic commands"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         # Core commands
         @app.command("help")
@@ -208,7 +208,7 @@ class TestMixingDecoratorAndProgrammatic:
 
     def test_both_approaches_coexist(self, cli_runner):
         """Test that both approaches work together"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         # Decorator approach
         @app.command_with_aliases("list", aliases=["ls"])
@@ -237,7 +237,7 @@ class TestMixingDecoratorAndProgrammatic:
 
     def test_add_alias_to_decorated_command(self, cli_runner):
         """Test adding alias to command registered with decorator"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():
@@ -259,7 +259,7 @@ class TestMixingDecoratorAndProgrammatic:
 
     def test_query_mixed_commands(self, cli_runner):
         """Test querying aliases from mixed registration methods"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():
@@ -287,7 +287,7 @@ class TestHelpWithProgrammaticAPI:
 
     def test_help_shows_programmatic_commands(self, cli_runner, clean_output):
         """Test that help shows programmatically registered commands"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         def list_items():
             """List all items."""
@@ -306,7 +306,7 @@ class TestHelpWithProgrammaticAPI:
 
     def test_command_help_after_add_alias(self, cli_runner, clean_output):
         """Test that command help works after adding alias"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -342,7 +342,7 @@ class TestErrorHandling:
 
     def test_add_alias_nonexistent_command_error(self, cli_runner):
         """Test clear error when adding alias to non-existent command"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -363,7 +363,7 @@ class TestErrorHandling:
 
     def test_duplicate_alias_error(self, cli_runner):
         """Test clear error when alias conflicts"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -387,7 +387,7 @@ class TestRealWorldScenarios:
 
     def test_configuration_based_aliases(self, cli_runner):
         """Test adding aliases based on configuration"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -412,7 +412,7 @@ class TestRealWorldScenarios:
 
     def test_user_customisation_workflow(self, cli_runner):
         """Test workflow where user customises aliases"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("checkout", aliases=["co"])
         def checkout(branch: str):
@@ -438,7 +438,7 @@ class TestRealWorldScenarios:
 
     def test_backwards_compatibility_aliases(self, cli_runner):
         """Test maintaining backwards compatibility with old command names"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("add")
         def add_item(name: str):
@@ -465,7 +465,7 @@ class TestAliasReregistration:
 
     def test_re_add_removed_alias(self, cli_runner):
         """Test that a removed alias can be re-added and work again"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -494,7 +494,7 @@ class TestAliasReregistration:
 
     def test_re_add_removed_alias_to_different_command(self, cli_runner):
         """Test that a removed alias can be added to a different command"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -523,7 +523,7 @@ class TestAliasReregistration:
 
     def test_cannot_add_active_alias(self, cli_runner):
         """Test that adding an alias that's currently active raises error"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -542,7 +542,7 @@ class TestAliasReregistration:
 
     def test_re_add_multiple_times(self, cli_runner):
         """Test that an alias can be removed and re-added multiple times"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -578,10 +578,10 @@ class TestRegularTyperWithMonkeyPatch:
     """Tests for regular Typer instances with the monkey patch applied"""
 
     def test_regular_typer_still_works(self, cli_runner):
-        """Test that regular Typer apps still work after AliasedTyper import"""
+        """Test that regular Typer apps still work after ExtendedTyper import"""
         import typer
 
-        # Regular Typer (not AliasedTyper)
+        # Regular Typer (not ExtendedTyper)
         app = typer.Typer()
 
         @app.command("list")
@@ -604,7 +604,7 @@ class TestRegularTyperWithMonkeyPatch:
         assert "Deleting items..." in result.output
 
     def test_regular_typer_help_still_works(self, cli_runner):
-        """Test that regular Typer help text still works after AliasedTyper import"""
+        """Test that regular Typer help text still works after ExtendedTyper import"""
         import typer
 
         app = typer.Typer()

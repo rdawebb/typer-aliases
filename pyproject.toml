@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "typer-aliases"
+name = "typer-extensions"
 version = "0.2.1"
 description = "Command aliases for Typer CLI applications"
 readme = "README.md"
@@ -42,11 +42,11 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/rdawebb/typer-aliases"
-Documentation = "https://github.com/rdawebb/typer-aliases#readme"
-Repository = "https://github.com/rdawebb/typer-aliases"
-Changelog = "https://github.com/rdawebb/typer-aliases/blob/main/CHANGELOG.md"
-Issues = "https://github.com/rdawebb/typer-aliases/issues"
+Homepage = "https://github.com/rdawebb/typer-extensions"
+Documentation = "https://github.com/rdawebb/typer-extensions#readme"
+Repository = "https://github.com/rdawebb/typer-extensions"
+Changelog = "https://github.com/rdawebb/typer-extensions/blob/main/CHANGELOG.md"
+Issues = "https://github.com/rdawebb/typer-extensions/issues"
 
 [tool.hatch.build.targets.sdist]
 include = [
@@ -57,7 +57,7 @@ include = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/typer_aliases"]
+packages = ["src/typer_extensions"]
 
 [tool.ruff]
 src = ["src", "tests"]

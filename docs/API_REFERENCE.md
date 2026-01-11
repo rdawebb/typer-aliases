@@ -1,6 +1,6 @@
 # API Reference
 
-Complete API documentation for typer-aliases.
+Complete API documentation for typer-extensions.
 
 ---
 

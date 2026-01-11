@@ -1,7 +1,7 @@
 """Unit tests for programmatic API methods."""
 
 import pytest
-from typer_aliases import AliasedTyper
+from typer_extensions import ExtendedTyper
 
 
 class TestAddAliasedCommand:
@@ -9,7 +9,7 @@ class TestAddAliasedCommand:
 
     def test_add_command_with_aliases(self):
         """Test adding command with aliases programmatically."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         def list_items():
             """List items."""
@@ -28,7 +28,7 @@ class TestAddAliasedCommand:
 
     def test_add_command_without_aliases(self):
         """Test adding command without aliases."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         def list_items():
             """List items."""
@@ -45,7 +45,7 @@ class TestAddAliasedCommand:
 
     def test_add_command_inferred_name(self):
         """Test adding command with inferred name."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         def list_items():
             """List items."""
@@ -63,7 +63,7 @@ class TestAddAliasedCommand:
 
     def test_add_command_with_kwargs(self):
         """Test that kwargs are passed through."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         def list_items():
             """List items."""
@@ -82,7 +82,7 @@ class TestAddAliasedCommand:
 
     def test_add_multiple_commands(self):
         """Test adding multiple commands programmatically."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         def list_items():
             pass
@@ -102,7 +102,7 @@ class TestAddAlias:
 
     def test_add_alias_to_existing_command(self):
         """Test adding alias to command registered with standard decorator."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -123,7 +123,7 @@ class TestAddAlias:
 
     def test_add_alias_to_decorated_command(self):
         """Test adding alias to command registered with decorator."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():
@@ -143,7 +143,7 @@ class TestAddAlias:
 
     def test_add_multiple_aliases(self):
         """Test adding multiple aliases one at a time."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -162,7 +162,7 @@ class TestAddAlias:
 
     def test_add_alias_nonexistent_command_raises(self):
         """Test that adding alias to non-existent command raises error."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -177,7 +177,7 @@ class TestAddAlias:
 
     def test_add_duplicate_alias_raises(self):
         """Test that adding duplicate alias raises error."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -194,7 +194,7 @@ class TestAddAlias:
 
     def test_add_alias_case_insensitive(self):
         """Test adding alias with case insensitivity."""
-        app = AliasedTyper(alias_case_sensitive=False)
+        app = ExtendedTyper(alias_case_sensitive=False)
 
         @app.command("list")
         def list_items():
@@ -216,7 +216,7 @@ class TestRemoveAlias:
 
     def test_remove_existing_alias(self):
         """Test removing an existing alias."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls", "l"])
         def list_items():
@@ -234,7 +234,7 @@ class TestRemoveAlias:
 
     def test_remove_nonexistent_alias_returns_false(self):
         """Test that removing non-existent alias returns False."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -250,7 +250,7 @@ class TestRemoveAlias:
 
     def test_remove_alias_leaves_others(self):
         """Test that removing one alias doesn't affect others."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls", "l", "dir"])
         def list_items():
@@ -269,7 +269,7 @@ class TestRemoveAlias:
 
     def test_remove_last_alias(self):
         """Test removing the last alias for a command."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():
@@ -287,7 +287,7 @@ class TestRemoveAlias:
 
     def test_remove_alias_case_insensitive(self):
         """Test removing alias with case insensitivity."""
-        app = AliasedTyper(alias_case_sensitive=False)
+        app = ExtendedTyper(alias_case_sensitive=False)
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():
@@ -305,7 +305,7 @@ class TestRemoveAlias:
 
     def test_remove_same_alias_twice(self):
         """Test idempotency of remove_alias."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():
@@ -327,7 +327,7 @@ class TestGetAliases:
 
     def test_get_aliases_existing_command(self):
         """Test getting aliases for command with aliases."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls", "l", "dir"])
         def list_items():
@@ -343,7 +343,7 @@ class TestGetAliases:
 
     def test_get_aliases_no_aliases_returns_empty(self):
         """Test that command without aliases returns empty list."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -359,7 +359,7 @@ class TestGetAliases:
 
     def test_get_aliases_nonexistent_command_returns_empty(self):
         """Test that non-existent command returns empty list."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         aliases = app.get_aliases("nonexistent")
 
@@ -367,7 +367,7 @@ class TestGetAliases:
 
     def test_get_aliases_returns_copy(self):
         """Test that get_aliases returns a copy, not reference."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls", "l"])
         def list_items():
@@ -387,7 +387,7 @@ class TestGetAliases:
 
     def test_get_aliases_after_add(self):
         """Test getting aliases after dynamically adding one."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -405,7 +405,7 @@ class TestGetAliases:
 
     def test_get_aliases_after_remove(self):
         """Test getting aliases after removing one."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls", "l", "dir"])
         def list_items():
@@ -426,7 +426,7 @@ class TestListCommandsWithAliases:
 
     def test_list_all_commands_with_aliases(self):
         """Test listing all commands that have aliases."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls", "l"])
         def list_items():
@@ -442,7 +442,7 @@ class TestListCommandsWithAliases:
 
     def test_list_empty_when_no_aliases(self):
         """Test that list is empty when no commands have aliases."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -458,7 +458,7 @@ class TestListCommandsWithAliases:
 
     def test_list_returns_copy(self):
         """Test that list returns a copy of the data."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():
@@ -478,7 +478,7 @@ class TestListCommandsWithAliases:
 
     def test_list_excludes_commands_without_aliases(self):
         """Test that commands without aliases are excluded."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():
@@ -495,7 +495,7 @@ class TestListCommandsWithAliases:
 
     def test_list_after_dynamic_changes(self):
         """Test listing after dynamically adding/removing aliases."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -523,7 +523,7 @@ class TestProgrammaticAPIMixedUsage:
 
     def test_add_alias_to_programmatic_command(self):
         """Test adding alias to programmatically registered command."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         def list_items():
             pass
@@ -540,7 +540,7 @@ class TestProgrammaticAPIMixedUsage:
 
     def test_remove_alias_from_decorated_command(self):
         """Test removing alias from decorated command."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls", "l"])
         def list_items():
@@ -557,7 +557,7 @@ class TestProgrammaticAPIMixedUsage:
 
     def test_query_after_mixed_operations(self):
         """Test querying after mix of decorator and programmatic."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():

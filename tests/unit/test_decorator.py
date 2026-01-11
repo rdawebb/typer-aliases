@@ -4,7 +4,7 @@ import pytest
 import typer.main
 from click import Context
 
-from typer_aliases import AliasedTyper
+from typer_extensions import ExtendedTyper
 
 
 class TestDecoratorSyntax:
@@ -12,7 +12,7 @@ class TestDecoratorSyntax:
 
     def test_decorator_with_explicit_name_and_aliases(self):
         """Test @app.command_with_aliases("name", aliases=[...])"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls", "l"])
         def list_items():
@@ -26,7 +26,7 @@ class TestDecoratorSyntax:
 
     def test_decorator_with_inferred_name_and_aliases(self):
         """Test @app.command_with_aliases(aliases=[...]) - name inferred"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases(aliases=["ls", "l"])
         def list():
@@ -39,7 +39,7 @@ class TestDecoratorSyntax:
 
     def test_decorator_with_explicit_name_no_aliases(self):
         """Test @app.command_with_aliases("name") - no aliases"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list")
         def list_items():
@@ -52,7 +52,7 @@ class TestDecoratorSyntax:
 
     def test_decorator_without_parentheses(self):
         """Test @app.command_with_aliases - bare decorator"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases
         def list():
@@ -68,7 +68,7 @@ class TestDecoratorSyntax:
 
     def test_decorator_with_empty_alias_list(self):
         """Test @app.command_with_aliases("name", aliases=[])"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=[])
         def list_items():
@@ -80,7 +80,7 @@ class TestDecoratorSyntax:
 
     def test_decorator_with_none_aliases(self):
         """Test @app.command_with_aliases("name", aliases=None)"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=None)
         def list_items():
@@ -96,7 +96,7 @@ class TestDecoratorNameInference:
 
     def test_name_inferred_from_function_name(self):
         """Test that name is correctly inferred from function."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases(aliases=["ls"])
         def list_items():
@@ -109,7 +109,7 @@ class TestDecoratorNameInference:
 
     def test_explicit_name_overrides_function_name(self):
         """Test that explicit name takes precedence."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_all_items():
@@ -123,7 +123,7 @@ class TestDecoratorNameInference:
 
     def test_underscore_function_name(self):
         """Test function names with underscores."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases(aliases=["ls"])
         def list_all_items():
@@ -139,7 +139,7 @@ class TestDecoratorHelpText:
 
     def test_decorator_preserves_docstring(self):
         """Test that docstring is preserved as help text."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():
@@ -154,7 +154,7 @@ class TestDecoratorHelpText:
 
     def test_decorator_with_explicit_help_kwarg(self):
         """Test that explicit help kwarg works."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"], help="Custom help text")
         def list_items():
@@ -174,7 +174,7 @@ class TestDecoratorKwargs:
 
     def test_decorator_passes_context_settings(self):
         """Test that context_settings kwarg works."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases(
             "list", aliases=["ls"], context_settings={"allow_extra_args": True}
@@ -191,7 +191,7 @@ class TestDecoratorKwargs:
 
     def test_decorator_passes_deprecated(self):
         """Test that deprecated kwarg works."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"], deprecated=True)
         def list_items():
@@ -206,7 +206,7 @@ class TestDecoratorKwargs:
 
     def test_decorator_with_multiple_kwargs(self):
         """Test decorator with multiple Typer kwargs."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases(
             "list",
@@ -230,7 +230,7 @@ class TestDecoratorEdgeCases:
 
     def test_decorator_with_single_alias(self):
         """Test decorator with just one alias."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():
@@ -241,7 +241,7 @@ class TestDecoratorEdgeCases:
 
     def test_decorator_with_many_aliases(self):
         """Test decorator with many aliases."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         aliases = ["ls", "l", "dir", "ll", "la"]
 
@@ -256,7 +256,7 @@ class TestDecoratorEdgeCases:
 
     def test_decorator_duplicate_alias_raises(self):
         """Test that duplicate aliases are detected."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():
@@ -272,7 +272,7 @@ class TestDecoratorEdgeCases:
 
     def test_decorator_on_lambda_raises_no_error(self):
         """Test decorator can work with lambda (though not recommended)."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         # This should work but name will be '<lambda>'
         def list_func():
@@ -288,7 +288,7 @@ class TestDecoratorReturnValue:
 
     def test_decorator_returns_command_object(self):
         """Test that decorator returns Click Command."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():
@@ -301,7 +301,7 @@ class TestDecoratorReturnValue:
 
     def test_decorator_command_callable(self):
         """Test that the decorated command is still the original function."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         def original_func():
             """List items."""
@@ -319,7 +319,7 @@ class TestDecoratorMultipleCommands:
 
     def test_multiple_decorated_commands(self):
         """Test decorating multiple commands."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls", "l"])
         def list_items():
@@ -338,7 +338,7 @@ class TestDecoratorMultipleCommands:
 
     def test_mixing_decorator_and_standard_command(self):
         """Test mixing decorated and standard commands."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():

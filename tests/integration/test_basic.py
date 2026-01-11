@@ -1,6 +1,6 @@
 """Integration tests for basic command invocation with aliases."""
 
-from typer_aliases import AliasedTyper
+from typer_extensions import ExtendedTyper
 
 
 class TestBasicInvocation:
@@ -8,7 +8,7 @@ class TestBasicInvocation:
 
     def test_invoke_command_by_primary_name(self, cli_runner):
         """Test invoking command using primary name."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -30,7 +30,7 @@ class TestHelpText:
 
     def test_help_shows_primary_command(self, cli_runner, clean_output):
         """Test that help text shows primary command."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         def list_items():
             """List all items in the system."""
@@ -48,7 +48,7 @@ class TestHelpText:
 
     def test_command_help_works_via_alias(self, cli_runner, clean_output):
         """Test that command-specific help works via alias."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         def list_items():
             """List all items in the system."""
@@ -81,7 +81,7 @@ class TestErrorHandling:
 
     def test_invalid_command_shows_error(self, cli_runner):
         """Test that invalid command shows appropriate error."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -94,7 +94,7 @@ class TestErrorHandling:
 
     def test_case_sensitivity_respected(self, cli_runner):
         """Test that case sensitivity is respected when configured."""
-        app = AliasedTyper(alias_case_sensitive=True)
+        app = ExtendedTyper(alias_case_sensitive=True)
 
         def list_items():
             """List items."""
@@ -115,7 +115,7 @@ class TestErrorHandling:
 
     def test_single_command_works_without_alias(self, cli_runner):
         """Test that single-command apps work as expected (aliases not supported by Typer)."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command()
         def hello(name: str):
@@ -129,7 +129,7 @@ class TestErrorHandling:
 
     def test_case_insensitivity_works(self, cli_runner):
         """Test that case insensitivity works when configured."""
-        app = AliasedTyper(alias_case_sensitive=False)
+        app = ExtendedTyper(alias_case_sensitive=False)
 
         def list_items():
             """List items."""
@@ -153,7 +153,7 @@ class TestTyperCompatibility:
 
     def test_standard_typer_command_still_works(self, cli_runner):
         """Test that standard Typer commands work without aliases."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command()
         def hello(name: str):
@@ -171,7 +171,7 @@ class TestTyperCompatibility:
 
     def test_mixed_commands_with_and_without_aliases(self, cli_runner):
         """Test mixing aliased and non-aliased commands."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command()
         def hello(name: str):
@@ -194,7 +194,7 @@ class TestTyperCompatibility:
         """Test that Typer context still works correctly."""
         import typer
 
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items(ctx: typer.Context):

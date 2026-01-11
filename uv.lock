@@ -616,7 +616,7 @@ wheels = [
 ]
 
 [[package]]
-name = "typer-aliases"
+name = "typer-extensions"
 version = "0.2.1"
 source = { editable = "." }
 dependencies = [

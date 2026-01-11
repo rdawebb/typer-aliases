@@ -55,7 +55,7 @@ def build() -> int:
     ):
         return 1
 
-    # Step 4: Install package from dist
+    # Step 4: Install package from dist & required dependencies
     print("\n💾 Installing package from dist")
     wheel_files = list(Path(dist_dir).glob("*.whl"))
     if not wheel_files:
@@ -63,7 +63,7 @@ def build() -> int:
         return 1
 
     wheel_path = wheel_files[0]
-    pip_cmd = f"source {test_env}/bin/activate && uv pip install {wheel_path} pytest"
+    pip_cmd = f"source {test_env}/bin/activate && uv pip install {wheel_path} pytest && uv pip install twine"
     try:
         subprocess.run(pip_cmd, shell=True, check=True, executable="/bin/bash")
         print(f"Installed {wheel_path.name}")
@@ -73,14 +73,23 @@ def build() -> int:
 
     # Step 5: Test import
     print("\n✅ Testing import")
-    import_cmd = f"source {test_env}/bin/activate && python -c 'import typer_aliases; print(f\"Version: {{typer_aliases.__version__}}\")'"
+    import_cmd = f"source {test_env}/bin/activate && python -c 'import typer_extensions; print(f\"Version: {{typer_extensions.__version__}}\")'"
     try:
         subprocess.run(import_cmd, shell=True, check=True, executable="/bin/bash")
     except subprocess.CalledProcessError as e:
         print(f"\n❌ Import test failed with exit code {e.returncode}\n")
         return 1
 
-    # Step 6: Run tests
+    # Step 6: Check distribution
+    print("\n🔍 Checking distribution")
+    check_cmd = f"source {test_env}/bin/activate && twine check {wheel_path}"
+    try:
+        subprocess.run(check_cmd, shell=True, check=True, executable="/bin/bash")
+    except subprocess.CalledProcessError as e:
+        print(f"\n❌ Distribution check failed with exit code {e.returncode}\n")
+        return 1
+
+    # Step 7: Run tests
     print("\n🧪 Running test suite\n")
     test_cmd = f"source {test_env}/bin/activate && pytest ."
     try:

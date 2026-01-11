@@ -1,25 +1,25 @@
 """Smoke tests for basic package functionality"""
 
-import typer_aliases
+import typer_extensions
 
 
 def test_package_imports():
     """Test that package imports successfully"""
-    assert hasattr(typer_aliases, "AliasedTyper")
-    assert hasattr(typer_aliases, "__version__")
+    assert hasattr(typer_extensions, "ExtendedTyper")
+    assert hasattr(typer_extensions, "__version__")
 
 
 def test_version_format():
     """Test that version string is properly formatted"""
-    version = typer_aliases.__version__
+    version = typer_extensions.__version__
     assert isinstance(version, str)
     assert len(version.split(".")) == 3  # semantic versioning
 
 
 def test_aliased_typer_instantiation():
-    """Test that AliasedTyper can be instantiated"""
-    app = typer_aliases.AliasedTyper()
-    assert isinstance(app, typer_aliases.AliasedTyper)
+    """Test that ExtendedTyper can be instantiated"""
+    app = typer_extensions.ExtendedTyper()
+    assert isinstance(app, typer_extensions.ExtendedTyper)
 
     # Verify it's also a Typer instance
     import typer
@@ -28,8 +28,8 @@ def test_aliased_typer_instantiation():
 
 
 def test_aliased_typer_has_core_methods():
-    """Test that AliasedTyper has core methods"""
-    app = typer_aliases.AliasedTyper()
+    """Test that ExtendedTyper has core methods"""
+    app = typer_extensions.ExtendedTyper()
     assert hasattr(app, "_register_alias")
     assert hasattr(app, "_register_command_with_aliases")
     assert hasattr(app, "_resolve_alias")
@@ -37,8 +37,8 @@ def test_aliased_typer_has_core_methods():
 
 
 def test_aliased_typer_config():
-    """Test that AliasedTyper stores configuration"""
-    app = typer_aliases.AliasedTyper(
+    """Test that ExtendedTyper stores configuration"""
+    app = typer_extensions.ExtendedTyper(
         alias_case_sensitive=False, show_aliases_in_help=False
     )
     assert app._alias_case_sensitive is False
@@ -46,10 +46,10 @@ def test_aliased_typer_config():
 
 
 def test_aliased_typer_has_argument_and_option():
-    """Test that AliasedTyper exposes Typer's Argument and Option"""
+    """Test that ExtendedTyper exposes Typer's Argument and Option"""
     import typer
 
-    app = typer_aliases.AliasedTyper()
+    app = typer_extensions.ExtendedTyper()
 
     # Should be accessible as class attributes
     assert hasattr(app, "Argument")

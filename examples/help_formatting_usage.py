@@ -1,9 +1,9 @@
-"""Help formatting customisation examples for typer-aliases
+"""Help formatting customisation examples for typer-extensions
 
 This example demonstrates how to customise the display of aliases in help text. Run with '--help' to see how aliases are displayed in the help text with different formatting options.
 """
 
-from typer_aliases import AliasedTyper
+from typer_extensions import ExtendedTyper
 
 print("=" * 70)
 print("EXAMPLE 1: Default formatting")
@@ -11,7 +11,7 @@ print("=" * 70)
 print("Run: python help_formatting.py default --help\n")
 
 # Default: parentheses, comma separator, max 3 displayed inline
-app_default = AliasedTyper()
+app_default = ExtendedTyper()
 
 
 @app_default.command_with_aliases("list", aliases=["ls", "l"])
@@ -32,7 +32,7 @@ print("=" * 70)
 print("Run: python help_formatting.py brackets --help\n")
 
 # Custom: brackets instead of parentheses
-app_brackets = AliasedTyper(alias_display_format="[{aliases}]")
+app_brackets = ExtendedTyper(alias_display_format="[{aliases}]")
 
 
 @app_brackets.command_with_aliases("list", aliases=["ls", "l"])
@@ -53,7 +53,7 @@ print("=" * 70)
 print("Run: python help_formatting.py separator --help\n")
 
 # Custom: pipe separator
-app_separator = AliasedTyper(alias_separator=" | ")
+app_separator = ExtendedTyper(alias_separator=" | ")
 
 
 @app_separator.command_with_aliases("list", aliases=["ls", "l", "dir"])
@@ -74,7 +74,7 @@ print("=" * 70)
 print("Run: python help_formatting.py truncate --help\n")
 
 # Truncation: max 2 displayed inline
-app_truncate = AliasedTyper(max_num_aliases=2)
+app_truncate = ExtendedTyper(max_num_aliases=2)
 
 
 @app_truncate.command_with_aliases("list", aliases=["ls", "l", "dir", "ll", "la"])
@@ -95,7 +95,7 @@ print("=" * 70)
 print("Run: python help_formatting.py hidden --help\n")
 
 # Hidden: don't show aliases in help
-app_hidden = AliasedTyper(show_aliases_in_help=False)
+app_hidden = ExtendedTyper(show_aliases_in_help=False)
 
 
 @app_hidden.command_with_aliases("list", aliases=["ls", "l"])
@@ -116,7 +116,7 @@ print("=" * 70)
 print("Run: python help_formatting.py custom --help\n")
 
 # Combined: brackets, pipe separator, max 2 displayed inline
-app_custom = AliasedTyper(
+app_custom = ExtendedTyper(
     alias_display_format="[{aliases}]", alias_separator=" / ", max_num_aliases=2
 )
 
@@ -134,7 +134,7 @@ def delete_custom():
 
 
 # Create main app that delegates to examples
-main_app = AliasedTyper()
+main_app = ExtendedTyper()
 main_app.add_typer(app_default, name="default")
 main_app.add_typer(app_brackets, name="brackets")
 main_app.add_typer(app_separator, name="separator")

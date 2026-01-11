@@ -1,6 +1,6 @@
 # User Guide
 
-Complete guide to using typer-aliases effectively.
+Complete guide to using typer-extensions effectively.
 
 ---
 

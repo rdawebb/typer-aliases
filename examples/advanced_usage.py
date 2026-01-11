@@ -1,13 +1,13 @@
-"""Advanced usage examples for typer-aliases
+"""Advanced usage examples for typer-extensions
 
 This example demonstrates various decorator patterns and features with a dummy Git-like CLI tool. Run with '--help' to see how aliases are displayed in the help text.
 """
 
 import typer
-from typer_aliases import AliasedTyper
+from typer_extensions import ExtendedTyper
 
 # Case-insensitive aliases
-app = AliasedTyper(
+app = ExtendedTyper(
     alias_case_sensitive=False, help="A Git-like CLI tool with command aliases"
 )
 

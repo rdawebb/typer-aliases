@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+
+### Changed
+
+- Changed project name to `typer-extensions` to reflect change in scope beyond purely command aliases
+- Changed `AliasedTyper` class to `ExtendedTyper`
+- Updated all package paths from `typer_aliases` to `typer_extensions`
+- Updated CI/CD workflow (Codecov action upgraded from v3 to v5)
+
+### Deprecated
+- Package name `typer-aliases` is deprecated in favor of `typer-extensions`
+- Class name `AliasedTyper` is deprecated in favor of `ExtendedTyper`
+
+
 ## [2.0.1] - 2026/01/11
 
 ### Added
@@ -37,7 +51,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
   - `alias_display_format` parameter for custom format strings
   - `alias_separator` parameter to customise alias list separator
   - `max_num_aliases` parameter to control truncation with "+N more" indicator
-- Format utilities module (`src/typer_aliases/format.py`):
+- Format utilities module (`src/typer_extensions/format.py`):
   - `truncate_aliases()` for alias list truncation
   - `format_command_with_aliases()` for individual command formatting
   - `format_commands_section()` for bulk command formatting
@@ -101,7 +115,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Initial project structure with Makefile and development tooling
 
 
-[Unreleased]: https://github.com/rdawebb/typer-aliases/compare/v0.1.0a1...HEAD
-[0.2.1]: https://github.com/rdawebb/typer-aliases/compare/v0.1.0a1...v0.2.1
-[0.2.0]: https://github.com/rdawebb/typer-aliases/compare/v0.1.0a1...v0.2.0
-[0.1.0]: https://github.com/rdawebb/typer-aliases/releases/tag/v0.1.0a1
+[Unreleased]: https://github.com/rdawebb/typer-extensions/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/rdawebb/typer-extensions/compare/v0.1.0a1...v0.2.1
+[0.2.0]: https://github.com/rdawebb/typer-extensions/compare/v0.1.0a1...v0.2.0
+[0.1.0]: https://github.com/rdawebb/typer-extensions/releases/tag/v0.1.0a1

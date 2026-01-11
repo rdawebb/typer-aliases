@@ -1,7 +1,7 @@
 """Script for Justfile help generation"""
 
 HELP_TEXT = """
-Available Development Recipes - typer-aliases
+Available Development Recipes - typer-extensions
 =============================================
 
 Setup:

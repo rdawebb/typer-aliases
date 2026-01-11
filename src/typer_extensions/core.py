@@ -1,4 +1,4 @@
-"""Core AliasedTyper class extending typer.Typer with alias support"""
+"""Core ExtendedTyper class extending typer.Typer with alias support"""
 
 import re
 from typing import Any, Callable, Optional, Protocol, Union, cast
@@ -21,13 +21,13 @@ class AliasedGroup(TyperGroup):
     def __init__(
         self,
         *args: Any,
-        aliased_typer: Optional["AliasedTyper"] = None,
+        aliased_typer: Optional["ExtendedTyper"] = None,
         **kwargs: Any,
     ) -> None:
         """Initialise the AliasedGroup
 
         Args:
-            aliased_typer: Reference to the AliasedTyper instance for alias resolution
+            aliased_typer: Reference to the ExtendedTyper instance for alias resolution
             *args, **kwargs: Arguments passed to Click Group
         """
         super().__init__(*args, **kwargs)
@@ -147,20 +147,20 @@ def _aliased_get_group_from_info(
     typer_info: "typer.main.TyperInfo",
     **kwargs: Any,
 ) -> Union[AliasedGroup, TyperGroup]:
-    """Custom version of get_group_from_info that returns AliasedGroup for AliasedTyper instances
+    """Custom version of get_group_from_info that returns AliasedGroup for ExtendedTyper instances
 
     Args:
         typer_info: The TyperInfo instance containing information about the Typer instance
         **kwargs: Additional keyword arguments
 
     Returns:
-        An AliasedGroup if the Typer instance is an AliasedTyper, otherwise a standard TyperGroup
+        An AliasedGroup if the Typer instance is an ExtendedTyper, otherwise a standard TyperGroup
     """
     # Call original function to get standard TyperGroup
     group = _original_get_group_from_info(typer_info, **kwargs)
 
-    # If Typer instance is AliasedTyper, wrap it in an AliasedGroup
-    if isinstance(typer_info.typer_instance, AliasedTyper):
+    # If Typer instance is ExtendedTyper, wrap it in an AliasedGroup
+    if isinstance(typer_info.typer_instance, ExtendedTyper):
         aliased_typer = typer_info.typer_instance
         aliased_group = AliasedGroup(
             name=group.name,
@@ -192,7 +192,7 @@ def _aliased_get_group_from_info(
 typer.main.get_group_from_info = _aliased_get_group_from_info  # type: ignore[assignment]
 
 
-class AliasedTyper(typer.Typer):
+class ExtendedTyper(typer.Typer):
     """Typer application with alias support"""
 
     # Expose Typer's Argument and Option
@@ -209,7 +209,7 @@ class AliasedTyper(typer.Typer):
         max_num_aliases: int = 3,
         **kwargs: Any,
     ) -> None:
-        """Initialise AliasedTyper
+        """Initialise ExtendedTyper
 
         Args:
             *args: Positional arguments for Typer

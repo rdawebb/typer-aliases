@@ -1,6 +1,6 @@
 """Integration tests for help text formatting with aliases."""
 
-from typer_aliases import AliasedTyper
+from typer_extensions import ExtendedTyper
 
 
 class TestHelpAliasDisplay:
@@ -8,7 +8,7 @@ class TestHelpAliasDisplay:
 
     def test_help_shows_aliases_grouped(self, cli_runner, clean_output):
         """Test that help displays aliases grouped with commands."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls", "l"])
         def list_items():
@@ -32,7 +32,7 @@ class TestHelpAliasDisplay:
 
     def test_help_respects_show_aliases_config(self, cli_runner, clean_output):
         """Test that show_aliases_in_help config disables display."""
-        app = AliasedTyper(show_aliases_in_help=False)
+        app = ExtendedTyper(show_aliases_in_help=False)
 
         @app.command_with_aliases("list", aliases=["ls", "l"])
         def list_items():
@@ -57,7 +57,7 @@ class TestHelpAliasDisplay:
 
     def test_help_truncates_many_aliases(self, cli_runner, clean_output):
         """Test that many aliases are truncated with +N more."""
-        app = AliasedTyper(max_num_aliases=2)
+        app = ExtendedTyper(max_num_aliases=2)
 
         @app.command_with_aliases("list", aliases=["a", "b", "c", "d"])
         def list_items():
@@ -82,7 +82,7 @@ class TestHelpCustomFormatting:
 
     def test_custom_display_format(self, cli_runner, clean_output):
         """Test custom alias display format."""
-        app = AliasedTyper(alias_display_format="[{aliases}]")
+        app = ExtendedTyper(alias_display_format="[{aliases}]")
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():
@@ -104,7 +104,7 @@ class TestHelpCustomFormatting:
 
     def test_custom_separator(self, cli_runner, clean_output):
         """Test custom alias separator."""
-        app = AliasedTyper(alias_separator=" | ")
+        app = ExtendedTyper(alias_separator=" | ")
 
         @app.command_with_aliases("list", aliases=["ls", "l"])
         def list_items():
@@ -125,7 +125,7 @@ class TestHelpCustomFormatting:
 
     def test_combined_custom_options(self, cli_runner, clean_output):
         """Test multiple custom formatting options together."""
-        app = AliasedTyper(
+        app = ExtendedTyper(
             alias_display_format="| {aliases}",
             alias_separator=", ",
             max_num_aliases=2,
@@ -154,7 +154,7 @@ class TestHelpWithMixedCommands:
 
     def test_mixed_aliased_and_standard(self, cli_runner, clean_output):
         """Test mix of aliased and non-aliased commands."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():
@@ -179,7 +179,7 @@ class TestHelpWithMixedCommands:
 
     def test_multiple_commands_various_alias_counts(self, cli_runner, clean_output):
         """Test commands with different numbers of aliases."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls", "l", "dir"])
         def list_items():
@@ -216,7 +216,7 @@ class TestHelpAlignment:
 
     def test_alignment_preserved(self, cli_runner, clean_output):
         """Test that command descriptions still align properly."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("short", aliases=["s"])
         def short_cmd():
@@ -246,7 +246,7 @@ class TestHelpWithDynamicAliases:
 
     def test_help_after_add_alias(self, cli_runner, clean_output):
         """Test help updates after adding alias dynamically."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -275,7 +275,7 @@ class TestHelpWithDynamicAliases:
 
     def test_help_after_remove_alias(self, cli_runner, clean_output):
         """Test help updates after removing alias."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls", "l"])
         def list_items():
@@ -305,7 +305,7 @@ class TestHelpWithDynamicAliases:
 
     def test_help_after_remove_all_aliases(self, cli_runner, clean_output):
         """Test help after removing all aliases."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():
@@ -334,7 +334,7 @@ class TestHelpEdgeCases:
 
     def test_command_without_help_text(self, cli_runner, clean_output):
         """Test command without docstring/help text."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():
@@ -353,7 +353,7 @@ class TestHelpEdgeCases:
 
     def test_very_long_alias_list(self, cli_runner, clean_output):
         """Test with many aliases beyond truncation limit."""
-        app = AliasedTyper(max_num_aliases=2)
+        app = ExtendedTyper(max_num_aliases=2)
 
         aliases = [f"alias{i}" for i in range(10)]
 
@@ -376,7 +376,7 @@ class TestHelpEdgeCases:
 
     def test_unicode_in_aliases(self, cli_runner, clean_output):
         """Test aliases with unicode characters."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["列表", "リスト"])
         def list_items():
@@ -401,7 +401,7 @@ class TestHelpRealWorldScenarios:
 
     def test_git_like_help(self, cli_runner, clean_output):
         """Test Git-like CLI help display."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("checkout", aliases=["co"])
         def checkout(branch: str):
@@ -434,7 +434,7 @@ class TestHelpRealWorldScenarios:
 
     def test_package_manager_help(self, cli_runner, clean_output):
         """Test package manager-like help display."""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("install", aliases=["i", "add"])
         def install(package: str):
@@ -462,7 +462,7 @@ class TestHelpRealWorldScenarios:
 
     def test_help_without_rich_markup_mode(self, cli_runner, clean_output):
         """Test that help works when rich_markup_mode is not enabled."""
-        app = AliasedTyper(rich_markup_mode=None)
+        app = ExtendedTyper(rich_markup_mode=None)
 
         @app.command_with_aliases("list", aliases=["ls"])
         def list_items():

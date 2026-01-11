@@ -1,6 +1,6 @@
 """Unit tests for formatters module."""
 
-from typer_aliases.format import (
+from typer_extensions.format import (
     format_command_with_aliases,
     format_commands_section,
     truncate_aliases,

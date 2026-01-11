@@ -1,16 +1,16 @@
-"""Unit tests for AliasedTyper core functionality"""
+"""Unit tests for ExtendedTyper core functionality"""
 
 import pytest
 
-from typer_aliases import AliasedTyper
+from typer_extensions import ExtendedTyper
 
 
-class TestAliasedTyperinitialisation:
-    """Tests for AliasedTyper initialisation."""
+class TestExtendedTyperinitialisation:
+    """Tests for ExtendedTyper initialisation."""
 
     def test_default_initialisation(self):
-        """Test that AliasedTyper initialises with default config"""
-        app = AliasedTyper()
+        """Test that ExtendedTyper initialises with default config"""
+        app = ExtendedTyper()
         assert app._alias_case_sensitive is True
         assert app._show_aliases_in_help is True
         assert app._command_aliases == {}
@@ -18,7 +18,7 @@ class TestAliasedTyperinitialisation:
 
     def test_custom_configuration(self):
         """Test that custom configuration is stored"""
-        app = AliasedTyper(
+        app = ExtendedTyper(
             alias_case_sensitive=False,
             show_aliases_in_help=False,
         )
@@ -31,13 +31,13 @@ class TestNameNormalisation:
 
     def test_normalise_case_sensitive(self):
         """Test name normalisation with case sensitivity"""
-        app = AliasedTyper(alias_case_sensitive=True)
+        app = ExtendedTyper(alias_case_sensitive=True)
         assert app._normalise_name("List") == "List"
         assert app._normalise_name("list") == "list"
 
     def test_normalise_case_insensitive(self):
         """Test name normalisation without case sensitivity"""
-        app = AliasedTyper(alias_case_sensitive=False)
+        app = ExtendedTyper(alias_case_sensitive=False)
         assert app._normalise_name("List") == "list"
         assert app._normalise_name("LIST") == "list"
 
@@ -47,7 +47,7 @@ class TestAliasRegistration:
 
     def test_register_single_alias(self):
         """Test registering a single alias"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
         app._register_alias("list", "ls")
 
         assert "list" in app._command_aliases
@@ -56,7 +56,7 @@ class TestAliasRegistration:
 
     def test_register_multiple_aliases_same_command(self):
         """Test registering multiple aliases for same command"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
         app._register_alias("list", "ls")
         app._register_alias("list", "l")
 
@@ -67,7 +67,7 @@ class TestAliasRegistration:
 
     def test_register_duplicate_alias_raises(self):
         """Test that duplicate alias raises ValueError"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
         app._register_alias("list", "ls")
 
         with pytest.raises(ValueError, match="already registered"):
@@ -75,14 +75,14 @@ class TestAliasRegistration:
 
     def test_alias_same_as_primary_raises(self):
         """Test that alias matching primary name raises ValueError"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         with pytest.raises(ValueError, match="cannot be the same as command name"):
             app._register_alias("list", "list")
 
     def test_case_insensitive_alias_conflict(self):
         """Test alias conflict detection with case insensitivity"""
-        app = AliasedTyper(alias_case_sensitive=False)
+        app = ExtendedTyper(alias_case_sensitive=False)
         app._register_alias("list", "ls")
 
         with pytest.raises(ValueError, match="already registered"):
@@ -90,7 +90,7 @@ class TestAliasRegistration:
 
     def test_case_sensitive_allows_different_case(self):
         """Test that case-sensitive mode allows different cases"""
-        app = AliasedTyper(alias_case_sensitive=True)
+        app = ExtendedTyper(alias_case_sensitive=True)
         app._register_alias("list", "ls")
         app._register_alias("delete", "LS")  # Case-sensitive, should work
 
@@ -103,19 +103,19 @@ class TestAliasResolution:
 
     def test_resolve_existing_alias(self):
         """Test resolving an existing alias"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
         app._register_alias("list", "ls")
 
         assert app._resolve_alias("ls") == "list"
 
     def test_resolve_nonexistent_alias(self):
         """Test resolving a non-existent alias returns None"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
         assert app._resolve_alias("nonexistent") is None
 
     def test_resolve_primary_name_returns_none(self):
         """Test that resolving primary name returns None"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
         app._register_alias("list", "ls")
 
         # Primary name is not an alias, should return None
@@ -123,7 +123,7 @@ class TestAliasResolution:
 
     def test_resolve_case_insensitive(self):
         """Test alias resolution with case insensitivity"""
-        app = AliasedTyper(alias_case_sensitive=False)
+        app = ExtendedTyper(alias_case_sensitive=False)
         app._register_alias("list", "ls")
 
         assert app._resolve_alias("LS") == "list"
@@ -135,7 +135,7 @@ class TestCommandWithAliases:
 
     def test_register_command_with_single_alias(self):
         """Test registering command with one alias"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         def list_items():
             """List items."""
@@ -149,7 +149,7 @@ class TestCommandWithAliases:
 
     def test_register_command_with_multiple_aliases(self):
         """Test registering command with multiple aliases"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         def list_items():
             """List items."""
@@ -166,7 +166,7 @@ class TestCommandWithAliases:
 
     def test_register_command_without_aliases(self):
         """Test registering command without aliases"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         def list_items():
             """List items."""
@@ -180,7 +180,7 @@ class TestCommandWithAliases:
 
     def test_register_command_empty_alias_list(self):
         """Test registering command with empty alias list"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         def list_items():
             """List items."""
@@ -193,7 +193,7 @@ class TestCommandWithAliases:
 
     def test_alias_conflicts_detected_during_registration(self):
         """Test that alias conflicts are detected during command registration"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         def list_items():
             """List items."""
@@ -220,7 +220,7 @@ class TestGetCommand:
         """Test getting command by primary name in multi-command app"""
         from unittest.mock import MagicMock
 
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -242,7 +242,7 @@ class TestGetCommand:
         """Test getting command by alias in multi-command app"""
         from unittest.mock import MagicMock
 
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         def list_items():
             """List items."""
@@ -272,7 +272,7 @@ class TestGetCommand:
         """Test getting non-existent command returns None"""
         from unittest.mock import MagicMock
 
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -293,7 +293,7 @@ class TestGetCommand:
         """Test getting command by case-insensitive alias"""
         from unittest.mock import MagicMock
 
-        app = AliasedTyper(alias_case_sensitive=False)
+        app = ExtendedTyper(alias_case_sensitive=False)
 
         def list_items():
             """List items."""
@@ -316,7 +316,7 @@ class TestGetCommand:
         """Test getting command by different aliases"""
         from unittest.mock import MagicMock
 
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         def list_items():
             """List items."""
@@ -348,7 +348,7 @@ class TestGetCommand:
         """Test getting command returns the default command"""
         from unittest.mock import MagicMock
 
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -370,7 +370,7 @@ class TestGetCommand:
         """Test None is returned for unknown commands"""
         from unittest.mock import MagicMock
 
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -388,9 +388,9 @@ class TestAliasedGroup:
     def test_get_command_by_alias(self):
         """Test AliasedGroup resolves a command by alias"""
         from click import Context
-        from typer_aliases.core import AliasedGroup
+        from typer_extensions.core import AliasedGroup
 
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         def list_items():
             """List items."""
@@ -409,9 +409,9 @@ class TestAliasedGroup:
     def test_get_command_with_unknown_command(self):
         """Test AliasedGroup returns None for unknown command/alias"""
         from click import Context
-        from typer_aliases.core import AliasedGroup
+        from typer_extensions.core import AliasedGroup
 
-        app = AliasedTyper()
+        app = ExtendedTyper()
         group = AliasedGroup(aliased_typer=app)
         ctx = Context(group)
 
@@ -420,7 +420,7 @@ class TestAliasedGroup:
     def test_get_command_without_aliased_typer(self):
         """Test AliasedGroup.get_command when aliased_typer is None"""
         from click import Context
-        from typer_aliases.core import AliasedGroup
+        from typer_extensions.core import AliasedGroup
 
         group = AliasedGroup(aliased_typer=None)
         ctx = Context(group)
@@ -436,42 +436,42 @@ class TestRegisterAliasValidation:
 
     def test_register_alias_empty_string(self):
         """Test that empty string alias raises ValueError"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         with pytest.raises(ValueError, match="Alias must be a non-empty string"):
             app._register_alias("list", "")
 
     def test_register_alias_none_value(self):
         """Test that None alias raises ValueError"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         with pytest.raises(ValueError, match="Alias must be a non-empty string"):
             app._register_alias("list", None)  # type: ignore[arg-type]
 
     def test_register_alias_non_string_type(self):
         """Test that non-string alias raises ValueError"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         with pytest.raises(ValueError, match="Alias must be a non-empty string"):
             app._register_alias("list", 123)  # type: ignore[arg-type]
 
     def test_register_alias_with_whitespace(self):
         """Test that alias with whitespace raises ValueError"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         with pytest.raises(ValueError, match="Alias cannot contain whitespace"):
             app._register_alias("list", "l s")
 
     def test_register_alias_with_tabs(self):
         """Test that alias with tabs raises ValueError"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         with pytest.raises(ValueError, match="Alias cannot contain whitespace"):
             app._register_alias("list", "l\ts")
 
     def test_register_alias_with_invalid_characters(self):
         """Test that alias with invalid characters raises ValueError"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         with pytest.raises(
             ValueError,
@@ -481,7 +481,7 @@ class TestRegisterAliasValidation:
 
     def test_register_alias_with_special_characters(self):
         """Test that alias with special characters raises ValueError"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         with pytest.raises(
             ValueError,
@@ -491,21 +491,21 @@ class TestRegisterAliasValidation:
 
     def test_register_alias_valid_with_dashes(self):
         """Test that alias with dashes is valid"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
         app._register_alias("list", "list-all")
 
         assert app._alias_to_command["list-all"] == "list"
 
     def test_register_alias_valid_with_underscores(self):
         """Test that alias with underscores is valid"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
         app._register_alias("list", "list_all")
 
         assert app._alias_to_command["list_all"] == "list"
 
     def test_register_alias_valid_with_unicode(self):
         """Test that alias with unicode characters is valid"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
         app._register_alias("list", "liés")
 
         assert app._alias_to_command["liés"] == "list"
@@ -516,7 +516,7 @@ class TestAddAliasToSingleCommandApp:
 
     def test_add_alias_to_single_command_app_raises(self):
         """Test that adding alias to single-command app raises ValueError"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command()
         def main():
@@ -530,7 +530,7 @@ class TestAddAliasToSingleCommandApp:
 
     def test_add_alias_to_nonexistent_command_raises(self):
         """Test that adding alias to non-existent command raises ValueError"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -551,7 +551,7 @@ class TestRemoveAliasEdgeCases:
 
     def test_remove_alias_when_primary_command_has_no_aliases_dict(self):
         """Test remove_alias when primary command is not in _command_aliases dict"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -580,7 +580,7 @@ class TestGetCommandEdgeCases:
         """Test get_command on fresh single-command app"""
         from unittest.mock import MagicMock
 
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         def main():
             """Main command."""
@@ -599,7 +599,7 @@ class TestGetCommandEdgeCases:
         """Test that get_command returns None for truly invalid commands"""
         from unittest.mock import MagicMock
 
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():
@@ -619,7 +619,7 @@ class TestGetCommandEdgeCases:
         """Test get_command when neither _group nor _command are set"""
         from unittest.mock import MagicMock, patch
 
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command("list")
         def list_items():

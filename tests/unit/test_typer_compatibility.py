@@ -1,39 +1,39 @@
 """Unit tests for Typer compatibility features like Argument and Option"""
 
 import typer
-from typer_aliases import AliasedTyper
+from typer_extensions import ExtendedTyper
 
 
 class TestTyperArgumentAndOption:
-    """Tests for accessing Typer's Argument and Option through AliasedTyper"""
+    """Tests for accessing Typer's Argument and Option through ExtendedTyper"""
 
     def test_argument_accessible(self):
-        """Test that Argument is accessible on AliasedTyper"""
-        app = AliasedTyper()
+        """Test that Argument is accessible on ExtendedTyper"""
+        app = ExtendedTyper()
         assert hasattr(app, "Argument")
         assert app.Argument == typer.Argument
 
     def test_option_accessible(self):
-        """Test that Option is accessible on AliasedTyper"""
-        app = AliasedTyper()
+        """Test that Option is accessible on ExtendedTyper"""
+        app = ExtendedTyper()
         assert hasattr(app, "Option")
         assert app.Option == typer.Option
 
     def test_argument_is_callable(self):
         """Test that Argument can be called as a function"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
         arg = app.Argument(...)
         assert arg is not None
 
     def test_option_is_callable(self):
         """Test that Option can be called as a function"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
         opt = app.Option(False)
         assert opt is not None
 
     def test_argument_with_decorator(self):
         """Test using Argument as part of function signature"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("greet", aliases=["hi"])
         def greet(name: str):
@@ -45,7 +45,7 @@ class TestTyperArgumentAndOption:
 
     def test_option_with_decorator(self):
         """Test using Option with command_with_aliases decorator"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("count", aliases=["c"])
         def count(items: int = app.Option(5, "--items", "-i")):
@@ -57,7 +57,7 @@ class TestTyperArgumentAndOption:
 
     def test_argument_and_option_together(self):
         """Test using Argument (as positional) and Option with command_with_aliases decorator"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command_with_aliases("task", aliases=["t"])
         def task(
@@ -72,7 +72,7 @@ class TestTyperArgumentAndOption:
 
     def test_argument_with_standard_command(self):
         """Test using positional arguments with standard @app.command decorator"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command()
         def list_items(limit: int):
@@ -84,7 +84,7 @@ class TestTyperArgumentAndOption:
 
     def test_option_with_standard_command(self):
         """Test using Option with standard @app.command decorator"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         @app.command()
         def show_info(verbose: bool = app.Option(False, "--verbose", "-v")):
@@ -96,7 +96,7 @@ class TestTyperArgumentAndOption:
 
     def test_explicit_argument_call(self):
         """Test explicitly calling app.Argument()"""
-        app = AliasedTyper()
+        app = ExtendedTyper()
 
         # Should be able to call app.Argument() like typer.Argument()
         arg = app.Argument(...)
