@@ -15,23 +15,23 @@ class HasName(Protocol):
     __name__: str
 
 
-class AliasedGroup(TyperGroup):
+class ExtendedGroup(TyperGroup):
     """Custom Click Group that handles command aliases"""
 
     def __init__(
         self,
         *args: Any,
-        aliased_typer: Optional["ExtendedTyper"] = None,
+        extended_typer: Optional["ExtendedTyper"] = None,
         **kwargs: Any,
     ) -> None:
-        """Initialise the AliasedGroup
+        """Initialise the ExtendedGroup
 
         Args:
-            aliased_typer: Reference to the ExtendedTyper instance for alias resolution
+            extended_typer: Reference to the ExtendedTyper instance for alias resolution
             *args, **kwargs: Arguments passed to Click Group
         """
         super().__init__(*args, **kwargs)
-        self.aliased_typer = aliased_typer
+        self.extended_typer = extended_typer
 
     def get_command(self, ctx: Context, cmd_name: str) -> Optional[Command]:
         """Override Click's get_command to support aliases
@@ -43,11 +43,11 @@ class AliasedGroup(TyperGroup):
         Returns:
             The command if found, None otherwise
         """
-        if self.aliased_typer is None:
+        if self.extended_typer is None:
             return super().get_command(ctx, cmd_name)
 
         # Try to resolve as an active alias first
-        primary_cmd = self.aliased_typer._resolve_alias(cmd_name)
+        primary_cmd = self.extended_typer._resolve_alias(cmd_name)
         if primary_cmd is not None:
             return super().get_command(ctx, primary_cmd)
 
@@ -95,18 +95,18 @@ class AliasedGroup(TyperGroup):
 
             for command in commands:
                 if (
-                    self.aliased_typer
-                    and self.aliased_typer._show_aliases_in_help
-                    and command.name in self.aliased_typer._command_aliases
+                    self.extended_typer
+                    and self.extended_typer._show_aliases_in_help
+                    and command.name in self.extended_typer._command_aliases
                 ):
                     from .format import format_command_with_aliases
 
                     formatted_name = format_command_with_aliases(
                         command.name,
-                        self.aliased_typer._command_aliases[command.name],
-                        display_format=self.aliased_typer._alias_display_format,
-                        max_num=self.aliased_typer._max_num_aliases,
-                        separator=self.aliased_typer._alias_separator,
+                        self.extended_typer._command_aliases[command.name],
+                        display_format=self.extended_typer._alias_display_format,
+                        max_num=self.extended_typer._max_num_aliases,
+                        separator=self.extended_typer._alias_separator,
                     )
 
                     # Longest formatted name for correct column width
@@ -136,33 +136,33 @@ class AliasedGroup(TyperGroup):
             super().format_help(ctx, formatter)
         finally:
             # Restore original function
-            rich_utils._print_commands_panel = original_print  # type: ignore[assignment]
+            rich_utils._print_commands_panel = original_print
 
 
 # Store original function
 _original_get_group_from_info = typer.main.get_group_from_info
 
 
-def _aliased_get_group_from_info(
+def _extended_get_group_from_info(
     typer_info: "typer.main.TyperInfo",
     **kwargs: Any,
-) -> Union[AliasedGroup, TyperGroup]:
-    """Custom version of get_group_from_info that returns AliasedGroup for ExtendedTyper instances
+) -> Union[ExtendedGroup, TyperGroup]:
+    """Custom version of get_group_from_info that returns ExtendedGroup for ExtendedTyper instances
 
     Args:
         typer_info: The TyperInfo instance containing information about the Typer instance
         **kwargs: Additional keyword arguments
 
     Returns:
-        An AliasedGroup if the Typer instance is an ExtendedTyper, otherwise a standard TyperGroup
+        An ExtendedGroup if the Typer instance is an ExtendedTyper, otherwise a standard TyperGroup
     """
     # Call original function to get standard TyperGroup
     group = _original_get_group_from_info(typer_info, **kwargs)
 
-    # If Typer instance is ExtendedTyper, wrap it in an AliasedGroup
+    # If Typer instance is ExtendedTyper, wrap it in an ExtendedGroup
     if isinstance(typer_info.typer_instance, ExtendedTyper):
-        aliased_typer = typer_info.typer_instance
-        aliased_group = AliasedGroup(
+        extended_typer = typer_info.typer_instance
+        extended_group = ExtendedGroup(
             name=group.name,
             callback=group.callback,
             params=group.params,
@@ -174,22 +174,22 @@ def _aliased_get_group_from_info(
             chain=group.chain,
             result_callback=group.result_callback,
             context_settings=group.context_settings,
-            aliased_typer=aliased_typer,
+            extended_typer=extended_typer,
             rich_markup_mode=group.rich_markup_mode,
             rich_help_panel=group.rich_help_panel,
         )
 
         for name, cmd in group.commands.items():
-            aliased_group.add_command(cmd, name=name)
+            extended_group.add_command(cmd, name=name)
 
-        return aliased_group
+        return extended_group
 
     # Standard TyperGroup
     return group
 
 
 # Apply monkey-patch to Typer's group creation function
-typer.main.get_group_from_info = _aliased_get_group_from_info  # type: ignore[assignment]
+typer.main.get_group_from_info = _extended_get_group_from_info  # type: ignore[assignment]
 
 
 class ExtendedTyper(typer.Typer):
@@ -198,6 +198,23 @@ class ExtendedTyper(typer.Typer):
     # Expose Typer's Argument and Option
     Argument = staticmethod(typer.Argument)
     Option = staticmethod(typer.Option)
+
+    # Expose common Typer utility functions
+    echo = staticmethod(typer.echo)
+    echo_via_pager = staticmethod(typer.echo_via_pager)
+    secho = staticmethod(typer.secho)
+    style = staticmethod(typer.style)
+    prompt = staticmethod(typer.prompt)
+    confirm = staticmethod(typer.confirm)
+    getchar = staticmethod(typer.getchar)
+    clear = staticmethod(typer.clear)
+    pause = staticmethod(typer.pause)
+    progressbar = staticmethod(typer.progressbar)
+    launch = staticmethod(typer.launch)
+    open_file = staticmethod(typer.open_file)
+    get_app_dir = staticmethod(typer.get_app_dir)
+    get_terminal_size = staticmethod(typer.get_terminal_size)
+    run = staticmethod(typer.run)
 
     def __init__(
         self,

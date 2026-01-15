@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "typer-extensions"
-version = "0.2.1"
+version = "0.2.2"
 description = "Command aliases for Typer CLI applications"
 readme = "README.md"
 authors = [{name = "Rob Webb"}]
@@ -34,11 +34,11 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "rust-just>=1.46.0,<2.0.0",
-    "prek>=0.2.27,<1.0.0",
+    "prek>=0.2.28,<1.0.0",
     "pytest>=8.0.0,<10.0.0",
     "pytest-cov>=7.0.0,<8.0.0",
-    "ruff>=0.14.0,<15.0.0",
-    "ty>=0.0.10,<0.1.0"
+    "ruff>=0.14.11,<15.0.0",
+    "ty>=0.0.12,<0.1.0"
 ]
 
 [project.urls]

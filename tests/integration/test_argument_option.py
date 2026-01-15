@@ -1,6 +1,5 @@
 """Integration tests for Arguments and Options with command aliases."""
 
-import typer
 from typer_extensions import ExtendedTyper
 
 
@@ -209,7 +208,7 @@ class TestOptionsWithAliases:
         app = ExtendedTyper()
 
         @app.command_with_aliases("list", aliases=["ls"])
-        def list_items(verbose: bool = typer.Option(False, "--verbose", "-v")):
+        def list_items(verbose: bool = app.Option(False, "--verbose", "-v")):
             """List items."""
             if verbose:
                 print("Listing items (verbose mode)")

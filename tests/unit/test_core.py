@@ -382,13 +382,13 @@ class TestGetCommand:
         assert app.get_command(ctx, "unknown") is None
 
 
-class TestAliasedGroup:
-    """Tests for AliasedGroup get_command"""
+class TestExtendedGroup:
+    """Tests for ExtendedGroup get_command"""
 
     def test_get_command_by_alias(self):
-        """Test AliasedGroup resolves a command by alias"""
+        """Test ExtendedGroup resolves a command by alias"""
         from click import Context
-        from typer_extensions.core import AliasedGroup
+        from typer_extensions.core import ExtendedGroup
 
         app = ExtendedTyper()
 
@@ -397,7 +397,7 @@ class TestAliasedGroup:
             pass
 
         app._register_command_with_aliases(list_items, "list", aliases=["ls"])
-        group = AliasedGroup(aliased_typer=app)
+        group = ExtendedGroup(extended_typer=app)
         ctx = Context(group)
 
         cmd = app.get_command(ctx, "list")
@@ -407,22 +407,22 @@ class TestAliasedGroup:
         assert group.get_command(ctx, "ls") is not None
 
     def test_get_command_with_unknown_command(self):
-        """Test AliasedGroup returns None for unknown command/alias"""
+        """Test ExtendedGroup returns None for unknown command/alias"""
         from click import Context
-        from typer_extensions.core import AliasedGroup
+        from typer_extensions.core import ExtendedGroup
 
         app = ExtendedTyper()
-        group = AliasedGroup(aliased_typer=app)
+        group = ExtendedGroup(extended_typer=app)
         ctx = Context(group)
 
         assert group.get_command(ctx, "unknown") is None
 
-    def test_get_command_without_aliased_typer(self):
-        """Test AliasedGroup.get_command when aliased_typer is None"""
+    def test_get_command_without_extended_typer(self):
+        """Test ExtendedGroup.get_command when extended_typer is None"""
         from click import Context
-        from typer_extensions.core import AliasedGroup
+        from typer_extensions.core import ExtendedGroup
 
-        group = AliasedGroup(aliased_typer=None)
+        group = ExtendedGroup(extended_typer=None)
         ctx = Context(group)
 
         # Should fall back to parent's get_command

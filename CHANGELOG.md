@@ -5,12 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [Unreleased]
+## [0.2.2] - 2026/01/15
+
+### Added
+
+- Exposed common Typer utility functions as static methods on `ExtendedTyper`
+  (echo, secho, prompt, confirm, style, etc.) for convenience
+- Comprehensive unit and integration tests for exposed utility functions with both primary commands and aliases
 
 ### Changed
 
 - Changed project name to `typer-extensions` to reflect change in scope beyond purely command aliases
-- Changed `AliasedTyper` class to `ExtendedTyper`
+- Renamed `AliasedTyper` class to `ExtendedTyper` for improved clarity
+- Renamed `AliasedGroup` class to `ExtendedGroup` for consistency
+- Changed internal parameter `aliased_typer` to `extended_typer` throughout codebase for consistency with class names
 - Updated all package paths from `typer_aliases` to `typer_extensions`
 - Updated CI/CD workflow (Codecov action upgraded from v3 to v5)
 
@@ -19,7 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Class name `AliasedTyper` is deprecated in favor of `ExtendedTyper`
 
 
-## [2.0.1] - 2026/01/11
+## [0.2.1] - 2026/01/11
 
 ### Added
 
@@ -115,7 +123,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Initial project structure with Makefile and development tooling
 
 
-[Unreleased]: https://github.com/rdawebb/typer-extensions/compare/v0.2.1...HEAD
-[0.2.1]: https://github.com/rdawebb/typer-extensions/compare/v0.1.0a1...v0.2.1
+[Unreleased]: https://github.com/rdawebb/typer-extensions/compare/v0.2.2...HEAD
+[0.2.2]: https://github.com/rdawebb/typer-extensions/compare/v0.2.1...v0.2.2
+[0.2.1]: https://github.com/rdawebb/typer-extensions/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/rdawebb/typer-extensions/compare/v0.1.0a1...v0.2.0
 [0.1.0]: https://github.com/rdawebb/typer-extensions/releases/tag/v0.1.0a1

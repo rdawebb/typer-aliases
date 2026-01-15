@@ -1,19 +1,20 @@
+[![CI](https://github.com/rdawebb/typer-extensions/workflows/test/badge.svg)](https://github.com/rdawebb/typer-extensions/actions)
+[![codecov](https://codecov.io/gh/rdawebb/typer-extensions/branch/main/graph/badge.svg?token=51D0ZPM7Y0)](https://codecov.io/gh/rdawebb/typer-extensions)
+[![PyPI](https://img.shields.io/pypi/v/typer-extensions.svg)](https://pypi.org/project/typer-extensions/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 # typer-extensions
 
 **Command aliases for Typer CLI applications with grouped help text display**
 
-[![CI](https://github.com/rdawebb/typer-extensions/workflows/test/badge.svg)](https://github.com/rdawebb/typer-extensions/actions)
-[![PyPI](https://img.shields.io/pypi/v/typer-extensions.svg)](https://pypi.org/project/typer-extensions/)
-[![Python Versions](https://img.shields.io/pypi/pyversions/typer-extensions.svg)](https://pypi.org/project/typer-extensions/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
----
 
 ## Overview
 
-`typer-extensions` extends [Typer](https://typer.tiangolo.com/) to provide simple drop-in support for command aliases. Instead of duplicating commands, hiding commands, or maintaining wrapper functions, define aliases directly and have them displayed cleanly in help text.
+[Typer](https://typer.tiangolo.com/) is great, but it could be even better!
 
-100% backwards compatible with Typer & existing Typer apps!
+`typer-extensions` extends Typer to provide simple drop-in support for command aliases. Instead of duplicating commands, hiding commands, or maintaining wrapper functions, define aliases directly and have them displayed cleanly in help text.
+
+**100% backwards compatible with Typer & existing Typer apps!**
 
 ### The Problem
 
@@ -72,9 +73,11 @@ Commands:
 ```
 
 **All work identically:**
-- `app list`
-- `app ls`
-- `app l`
+```bash
+app list
+app ls
+app l
+```
 
 ---
 
@@ -104,10 +107,11 @@ Commands:
 pip install typer-extensions
 ```
 
-**Requirements:**
-- Python 3.9+
-- typer >= 0.9.0 (recommend installing the latest version)
-- click >= 8.0.0
+> [!NOTE]
+> **Requirements:**
+> - Python 3.9+
+> - typer >= 0.9.0 (recommend installing the latest version)
+> - click >= 8.0.0
 
 ---
 
@@ -148,7 +152,8 @@ $ python app.py rm test.txt
 Deleting test.txt
 ```
 
-> 💡 **Want to learn more?** Check the [API Reference](docs/API_REFERENCE.md) for detailed configuration options, or see the [User Guide](docs/USER_GUIDE.md) for patterns and best practices.
+> [!TIP]
+> **Want to learn more?** Check the [API Reference](docs/API_REFERENCE.md) for detailed configuration options, or see the [User Guide](docs/USER_GUIDE.md) for patterns and best practices.
 
 ### Drop-in Compatibility
 
@@ -169,7 +174,8 @@ app = ExtendedTyper()
 
 Once migrated, you can add aliases to new commands using `@app.command_with_aliases()`, or to existing commands using the programmatic API.
 
-See [Migration Guide](docs/MIGRATION.md) for detailed migration strategies and patterns.
+> [!TIP]
+> See [Migration Guide](docs/MIGRATION.md) for detailed migration strategies and patterns.
 
 ### Advanced Features
 
@@ -300,7 +306,7 @@ app.list_commands_with_aliases() → dict  # All mappings
 ### Configuration
 ```python
 ExtendedTyper(
-    alias_case_sensitive=None,           # Case-sensitive matching (default True per Typer)
+    alias_case_sensitive=None,           # Case-sensitive (default True, matching Typer)
     show_aliases_in_help=True,           # Display aliases in help
     alias_display_format="({aliases})",  # Display format
     alias_separator=", ",                # Between aliases
@@ -346,9 +352,11 @@ just test-cov      # Full test suite with coverage
 just help          # List all available commands
 ```
 
-If you prefer to use `just` without the dev setup, you can install it globally via `pip install rust-just` or your system package manager.
+> [!NOTE]
+> If you prefer to use `just` without the dev setup, you can install it globally via `pip install rust-just` or your system package manager.
 
-See `Justfile` for all available commands.
+> [!TIP]
+> See `Justfile` for all available commands.
 
 ### Testing
 
@@ -401,7 +409,8 @@ Contributions are welcome! Please open an issue, ask a question, or submit a pul
 - Custom themes and help text formatting
 - Argument & Option customisation
 
-See [CHANGELOG.md](CHANGELOG.md) for version history.
+> [!NOTE]
+> See [CHANGELOG.md](CHANGELOG.md) for version history.
 
 ---
 
