@@ -9,7 +9,7 @@ from typer_extensions import ExtendedTyper
 app = ExtendedTyper()
 
 
-@app.command_with_aliases("list", aliases=["ls", "l"])
+@app.command("list", aliases=["ls", "l"])
 def list_items():
     """List all items in the system."""
     print("Listing items...")
@@ -18,14 +18,14 @@ def list_items():
     print("- Item 3")
 
 
-@app.command_with_aliases("delete", aliases=["rm", "del"])
+@app.command("delete", aliases=["rm", "del"])
 def delete_item(name: str):
     """Delete an item by name."""
     print(f"Deleting {name}...")
     print(f"✓ {name} deleted successfully")
 
 
-@app.command_with_aliases("create", aliases=["new", "add"])
+@app.command("create", aliases=["new", "add"])
 def create_item(name: str, description: str = ""):
     """Create a new item."""
     print(f"Creating item: {name}")
@@ -34,7 +34,7 @@ def create_item(name: str, description: str = ""):
     print("✓ Item created successfully")
 
 
-# Standard Typer command (no aliases)
+# Standard command (no aliases)
 @app.command()
 def hello(name: str = "World"):
     """Say hello."""

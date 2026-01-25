@@ -1,6 +1,6 @@
 """Help text formatting utilities"""
 
-from typing import Optional
+from typing import Union
 
 
 def truncate_aliases(
@@ -65,13 +65,13 @@ def format_command_with_aliases(
 
 
 def format_commands_section(
-    commands: list[tuple[str, Optional[str]]],
+    commands: list[tuple[str, Union[str, None]]],
     command_aliases: dict[str, list[str]],
     *,
     display_format: str = "({aliases})",
     max_num: int = 3,
     separator: str = ", ",
-) -> list[tuple[str, Optional[str]]]:
+) -> list[tuple[str, Union[str, None]]]:
     """Format a list of commands with their aliases
 
     Args:
@@ -84,7 +84,7 @@ def format_commands_section(
     Returns:
         A list of (formatted_command, help text) tuples
     """
-    formatted_commands = []
+    formatted_commands: list[tuple[str, Union[str, None]]] = []
 
     for cmd_name, help_text in commands:
         if cmd_name in command_aliases:

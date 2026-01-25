@@ -14,13 +14,13 @@ print("Run: python help_formatting.py default --help\n")
 app_default = ExtendedTyper()
 
 
-@app_default.command_with_aliases("list", aliases=["ls", "l"])
+@app_default.command("list", aliases=["ls", "l"])
 def list_default():
     """List items with default alias display."""
     print("Listing...")
 
 
-@app_default.command_with_aliases("delete", aliases=["rm", "remove", "del"])
+@app_default.command("delete", aliases=["rm", "remove", "del"])
 def delete_default():
     """Delete items with default alias display."""
     print("Deleting...")
@@ -35,13 +35,13 @@ print("Run: python help_formatting.py brackets --help\n")
 app_brackets = ExtendedTyper(alias_display_format="[{aliases}]")
 
 
-@app_brackets.command_with_aliases("list", aliases=["ls", "l"])
+@app_brackets.command("list", aliases=["ls", "l"])
 def list_brackets():
     """List items with bracketed aliases."""
     print("Listing...")
 
 
-@app_brackets.command_with_aliases("delete", aliases=["rm"])
+@app_brackets.command("delete", aliases=["rm"])
 def delete_brackets():
     """Delete items with bracketed aliases."""
     print("Deleting...")
@@ -56,13 +56,13 @@ print("Run: python help_formatting.py separator --help\n")
 app_separator = ExtendedTyper(alias_separator=" | ")
 
 
-@app_separator.command_with_aliases("list", aliases=["ls", "l", "dir"])
+@app_separator.command("list", aliases=["ls", "l", "dir"])
 def list_separator():
     """List items with pipe-separated aliases."""
     print("Listing...")
 
 
-@app_separator.command_with_aliases("delete", aliases=["rm", "remove"])
+@app_separator.command("delete", aliases=["rm", "remove"])
 def delete_separator():
     """Delete items with pipe-separated aliases."""
     print("Deleting...")
@@ -77,13 +77,13 @@ print("Run: python help_formatting.py truncate --help\n")
 app_truncate = ExtendedTyper(max_num_aliases=2)
 
 
-@app_truncate.command_with_aliases("list", aliases=["ls", "l", "dir", "ll", "la"])
+@app_truncate.command("list", aliases=["ls", "l", "dir", "ll", "la"])
 def list_truncate():
     """List items with truncated alias display."""
     print("Listing...")
 
 
-@app_truncate.command_with_aliases("delete", aliases=["rm", "remove", "del", "erase"])
+@app_truncate.command("delete", aliases=["rm", "remove", "del", "erase"])
 def delete_truncate():
     """Delete items with truncated alias display."""
     print("Deleting...")
@@ -98,13 +98,13 @@ print("Run: python help_formatting.py hidden --help\n")
 app_hidden = ExtendedTyper(show_aliases_in_help=False)
 
 
-@app_hidden.command_with_aliases("list", aliases=["ls", "l"])
+@app_hidden.command("list", aliases=["ls", "l"])
 def list_hidden():
     """List items (aliases not shown in help)."""
     print("Listing...")
 
 
-@app_hidden.command_with_aliases("delete", aliases=["rm"])
+@app_hidden.command("delete", aliases=["rm"])
 def delete_hidden():
     """Delete items (aliases not shown in help)."""
     print("Deleting...")
@@ -121,13 +121,13 @@ app_custom = ExtendedTyper(
 )
 
 
-@app_custom.command_with_aliases("list", aliases=["ls", "l", "dir", "ll"])
+@app_custom.command("list", aliases=["ls", "l", "dir", "ll"])
 def list_custom():
     """List items with fully customised display."""
     print("Listing...")
 
 
-@app_custom.command_with_aliases("delete", aliases=["rm", "remove"])
+@app_custom.command("delete", aliases=["rm", "remove"])
 def delete_custom():
     """Delete items with fully customised display."""
     print("Deleting...")

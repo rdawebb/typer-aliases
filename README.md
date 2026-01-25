@@ -471,7 +471,3 @@ Inspired by Git's command aliasing and various CLI tools that make shortcuts fee
 - **Changelog:** [CHANGELOG.md](CHANGELOG.md)
 
 ---
-
-<p align="center">
-  <i>Making CLI aliases natural and maintainable</i>
-</p>

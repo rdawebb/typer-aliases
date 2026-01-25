@@ -1,20 +1,19 @@
-"""Unit tests for command_with_aliases decorator"""
+"""Unit tests for command decorator"""
 
 import pytest
 import typer.main
-from click import Context
 
-from typer_extensions import ExtendedTyper
+from typer_extensions import Context, ExtendedTyper
 
 
 class TestDecoratorSyntax:
     """Tests for different decorator syntax variations."""
 
     def test_decorator_with_explicit_name_and_aliases(self):
-        """Test @app.command_with_aliases("name", aliases=[...])"""
+        """Test @app.command("name", aliases=[...])"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls", "l"])
+        @app.command("list", aliases=["ls", "l"])
         def list_items():
             """List items."""
             pass
@@ -25,10 +24,10 @@ class TestDecoratorSyntax:
         assert app._alias_to_command["l"] == "list"
 
     def test_decorator_with_inferred_name_and_aliases(self):
-        """Test @app.command_with_aliases(aliases=[...]) - name inferred"""
+        """Test @app.command(aliases=[...]) - name inferred"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases(aliases=["ls", "l"])
+        @app.command(aliases=["ls", "l"])
         def list():
             """List items."""
             pass
@@ -38,10 +37,10 @@ class TestDecoratorSyntax:
         assert app._command_aliases["list"] == ["ls", "l"]
 
     def test_decorator_with_explicit_name_no_aliases(self):
-        """Test @app.command_with_aliases("name") - no aliases"""
+        """Test @app.command("name") - no aliases"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list")
+        @app.command("list")
         def list_items():
             """List items."""
             pass
@@ -51,10 +50,10 @@ class TestDecoratorSyntax:
         assert len(app._alias_to_command) == 0
 
     def test_decorator_without_parentheses(self):
-        """Test @app.command_with_aliases - bare decorator"""
+        """Test @app.command - bare decorator"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases
+        @app.command
         def list():
             """List items."""
             pass
@@ -67,10 +66,10 @@ class TestDecoratorSyntax:
         assert getattr(click_command, "name", None) == "list"
 
     def test_decorator_with_empty_alias_list(self):
-        """Test @app.command_with_aliases("name", aliases=[])"""
+        """Test @app.command("name", aliases=[])"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=[])
+        @app.command("list", aliases=[])
         def list_items():
             """List items."""
             pass
@@ -79,10 +78,10 @@ class TestDecoratorSyntax:
         assert len(app._alias_to_command) == 0
 
     def test_decorator_with_none_aliases(self):
-        """Test @app.command_with_aliases("name", aliases=None)"""
+        """Test @app.command("name", aliases=None)"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=None)
+        @app.command("list", aliases=None)
         def list_items():
             """List items."""
             pass
@@ -98,7 +97,7 @@ class TestDecoratorNameInference:
         """Test that name is correctly inferred from function."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases(aliases=["ls"])
+        @app.command(aliases=["ls"])
         def list_items():
             """List items."""
             pass
@@ -111,7 +110,7 @@ class TestDecoratorNameInference:
         """Test that explicit name takes precedence."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_all_items():
             """List items."""
             pass
@@ -125,7 +124,7 @@ class TestDecoratorNameInference:
         """Test function names with underscores."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases(aliases=["ls"])
+        @app.command(aliases=["ls"])
         def list_all_items():
             """List items."""
             pass
@@ -141,14 +140,14 @@ class TestDecoratorHelpText:
         """Test that docstring is preserved as help text."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             """List all items in the system."""
             pass
 
         click_group = typer.main.get_command(app)
         ctx = Context(click_group)
-        cmd = app.get_command(ctx, "list")
+        cmd = app._get_command(ctx, "list")
         assert cmd is not None
         assert "List all items" in (cmd.help or "")
 
@@ -156,14 +155,14 @@ class TestDecoratorHelpText:
         """Test that explicit help kwarg works."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"], help="Custom help text")
+        @app.command("list", aliases=["ls"], help="Custom help text")
         def list_items():
             """Original docstring."""
             pass
 
         click_group = typer.main.get_command(app)
         ctx = Context(click_group)
-        cmd = app.get_command(ctx, "list")
+        cmd = app._get_command(ctx, "list")
         assert cmd is not None
         # Explicit help should override docstring
         assert "Custom help" in (cmd.help or "")
@@ -176,7 +175,7 @@ class TestDecoratorKwargs:
         """Test that context_settings kwarg works."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases(
+        @app.command(
             "list", aliases=["ls"], context_settings={"allow_extra_args": True}
         )
         def list_items():
@@ -185,7 +184,7 @@ class TestDecoratorKwargs:
 
         click_group = typer.main.get_command(app)
         ctx = Context(click_group)
-        cmd = app.get_command(ctx, "list")
+        cmd = app._get_command(ctx, "list")
         assert cmd is not None
         assert cmd.context_settings is not None
 
@@ -193,14 +192,14 @@ class TestDecoratorKwargs:
         """Test that deprecated kwarg works."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"], deprecated=True)
+        @app.command("list", aliases=["ls"], deprecated=True)
         def list_items():
             """List items."""
             pass
 
         click_group = typer.main.get_command(app)
         ctx = Context(click_group)
-        cmd = app.get_command(ctx, "list")
+        cmd = app._get_command(ctx, "list")
         assert cmd is not None
         assert cmd.deprecated is True
 
@@ -208,7 +207,7 @@ class TestDecoratorKwargs:
         """Test decorator with multiple Typer kwargs."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases(
+        @app.command(
             "list",
             aliases=["ls"],
             help="List items",
@@ -220,7 +219,7 @@ class TestDecoratorKwargs:
 
         click_group = typer.main.get_command(app)
         ctx = Context(click_group)
-        cmd = app.get_command(ctx, "list")
+        cmd = app._get_command(ctx, "list")
         assert cmd is not None
         assert "List items" in (cmd.help or "")
 
@@ -232,7 +231,7 @@ class TestDecoratorEdgeCases:
         """Test decorator with just one alias."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             """List items."""
             pass
@@ -245,7 +244,7 @@ class TestDecoratorEdgeCases:
 
         aliases = ["ls", "l", "dir", "ll", "la"]
 
-        @app.command_with_aliases("list", aliases=aliases)
+        @app.command("list", aliases=aliases)
         def list_items():
             """List items."""
             pass
@@ -258,14 +257,14 @@ class TestDecoratorEdgeCases:
         """Test that duplicate aliases are detected."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             """List items."""
             pass
 
         with pytest.raises(ValueError, match="already registered"):
 
-            @app.command_with_aliases("delete", aliases=["ls"])
+            @app.command("delete", aliases=["ls"])
             def delete_items():
                 """Delete items."""
                 pass
@@ -278,7 +277,7 @@ class TestDecoratorEdgeCases:
         def list_func():
             print("listing")
 
-        app.command_with_aliases("list", aliases=["ls"])(list_func)
+        app.command("list", aliases=["ls"])(list_func)
 
         assert "list" in app._command_aliases
 
@@ -290,7 +289,7 @@ class TestDecoratorReturnValue:
         """Test that decorator returns Click Command."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             """List items."""
             pass
@@ -307,7 +306,7 @@ class TestDecoratorReturnValue:
             """List items."""
             return "listed"
 
-        decorated = app.command_with_aliases("list", aliases=["ls"])(original_func)
+        decorated = app.command("list", aliases=["ls"])(original_func)
 
         # The decorated result should be a Command, but we can verify
         # it was created from the original function
@@ -321,12 +320,12 @@ class TestDecoratorMultipleCommands:
         """Test decorating multiple commands."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls", "l"])
+        @app.command("list", aliases=["ls", "l"])
         def list_items():
             """List items."""
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm", "remove"])
+        @app.command("delete", aliases=["rm", "remove"])
         def delete_item():
             """Delete item."""
             pass
@@ -340,7 +339,7 @@ class TestDecoratorMultipleCommands:
         """Test mixing decorated and standard commands."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             """List items."""
             pass
@@ -353,8 +352,8 @@ class TestDecoratorMultipleCommands:
         # Both should be registered
         click_group = typer.main.get_command(app)
         ctx = Context(click_group)
-        assert app.get_command(ctx, "list") is not None
-        assert app.get_command(ctx, "hello") is not None
+        assert app._get_command(ctx, "list") is not None
+        assert app._get_command(ctx, "hello") is not None
 
         # Only list should have aliases
         assert "list" in app._command_aliases

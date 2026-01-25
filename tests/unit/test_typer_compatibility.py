@@ -38,7 +38,7 @@ class TestTyperArgumentAndOption:
         """Test using Argument as part of function signature"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("greet", aliases=["hi"])
+        @app.command("greet", aliases=["hi"])
         def greet(name: str):
             """Greet someone."""
             return f"Hello, {name}!"
@@ -50,7 +50,7 @@ class TestTyperArgumentAndOption:
         """Test using Option with command_with_aliases decorator"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("count", aliases=["c"])
+        @app.command("count", aliases=["c"])
         def count(items: int = app.Option(5, "--items", "-i")):
             """Count items."""
             return f"Total: {items}"
@@ -62,7 +62,7 @@ class TestTyperArgumentAndOption:
         """Test using Argument (as positional) and Option with command_with_aliases decorator"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("task", aliases=["t"])
+        @app.command("task", aliases=["t"])
         def task(
             name: str,
             priority: int = app.Option(1, "--priority", "-p"),

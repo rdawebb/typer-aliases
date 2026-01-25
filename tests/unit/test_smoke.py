@@ -33,7 +33,7 @@ def test_aliased_typer_has_core_methods():
     assert hasattr(app, "_register_alias")
     assert hasattr(app, "_register_command_with_aliases")
     assert hasattr(app, "_resolve_alias")
-    assert hasattr(app, "get_command")
+    assert hasattr(app, "_get_command")
 
 
 def test_aliased_typer_config():
@@ -42,7 +42,7 @@ def test_aliased_typer_config():
         alias_case_sensitive=False, show_aliases_in_help=False
     )
     assert app._alias_case_sensitive is False
-    assert app._show_aliases_in_help is False
+    assert app.show_aliases_in_help is False
 
 
 def test_aliased_typer_has_argument_and_option():

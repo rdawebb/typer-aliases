@@ -5,7 +5,8 @@ from typing import Any, Callable, Optional, Protocol, Union, cast
 
 import typer
 import typer.main
-from click import Command, Context, Group
+import click
+from click import Command, Group
 from typer.core import TyperGroup
 
 
@@ -31,9 +32,9 @@ class ExtendedGroup(TyperGroup):
             *args, **kwargs: Arguments passed to Click Group
         """
         super().__init__(*args, **kwargs)
-        self.extended_typer = extended_typer
+        self._extended_typer = extended_typer
 
-    def get_command(self, ctx: Context, cmd_name: str) -> Optional[Command]:
+    def get_command(self, ctx: click.core.Context, cmd_name: str) -> Optional[Command]:
         """Override Click's get_command to support aliases
 
         Args:
@@ -43,11 +44,11 @@ class ExtendedGroup(TyperGroup):
         Returns:
             The command if found, None otherwise
         """
-        if self.extended_typer is None:
+        if self._extended_typer is None:
             return super().get_command(ctx, cmd_name)
 
         # Try to resolve as an active alias first
-        primary_cmd = self.extended_typer._resolve_alias(cmd_name)
+        primary_cmd = self._extended_typer._resolve_alias(cmd_name)
         if primary_cmd is not None:
             return super().get_command(ctx, primary_cmd)
 
@@ -57,7 +58,7 @@ class ExtendedGroup(TyperGroup):
 
         return None
 
-    def format_help(self, ctx: Context, formatter: Any) -> None:
+    def format_help(self, ctx: click.core.Context, formatter: Any) -> None:
         """Override TyperGroup's format_help to inject aliases into Rich output
 
         Args:
@@ -90,23 +91,23 @@ class ExtendedGroup(TyperGroup):
                 console: The console instance for output
                 cmd_len: The length of the longest command name
             """
-            modified_commands = []
+            modified_commands: list[Command] = []
             max_len = cmd_len
 
             for command in commands:
                 if (
-                    self.extended_typer
-                    and self.extended_typer._show_aliases_in_help
-                    and command.name in self.extended_typer._command_aliases
+                    self._extended_typer
+                    and self._extended_typer.show_aliases_in_help
+                    and command.name in self._extended_typer._command_aliases
                 ):
                     from .format import format_command_with_aliases
 
                     formatted_name = format_command_with_aliases(
                         command.name,
-                        self.extended_typer._command_aliases[command.name],
-                        display_format=self.extended_typer._alias_display_format,
-                        max_num=self.extended_typer._max_num_aliases,
-                        separator=self.extended_typer._alias_separator,
+                        self._extended_typer._command_aliases[command.name],
+                        display_format=self._extended_typer.alias_display_format,
+                        max_num=self._extended_typer.max_num_aliases,
+                        separator=self._extended_typer.alias_separator,
                     )
 
                     # Longest formatted name for correct column width
@@ -130,7 +131,7 @@ class ExtendedGroup(TyperGroup):
             )
 
         # Temporarily replace the function
-        rich_utils._print_commands_panel = custom_print_commands_panel  # type: ignore[assignment]
+        rich_utils._print_commands_panel = custom_print_commands_panel  # type: ignore[attr-defined]
         try:
             # Call parent's format_help with custom_print_commands_panel
             super().format_help(ctx, formatter)
@@ -144,7 +145,7 @@ _original_get_group_from_info = typer.main.get_group_from_info
 
 
 def _extended_get_group_from_info(
-    typer_info: "typer.main.TyperInfo",
+    typer_info: Any,
     **kwargs: Any,
 ) -> Union[ExtendedGroup, TyperGroup]:
     """Custom version of get_group_from_info that returns ExtendedGroup for ExtendedTyper instances
@@ -192,6 +193,12 @@ def _extended_get_group_from_info(
 typer.main.get_group_from_info = _extended_get_group_from_info  # type: ignore[assignment]
 
 
+class Context(typer.Context):
+    """Context for ExtendedTyper commands."""
+
+    pass
+
+
 class ExtendedTyper(typer.Typer):
     """Typer application with alias support"""
 
@@ -215,6 +222,8 @@ class ExtendedTyper(typer.Typer):
     get_app_dir = staticmethod(typer.get_app_dir)
     get_terminal_size = staticmethod(typer.get_terminal_size)
     run = staticmethod(typer.run)
+
+    _alias_case_sensitive: bool
 
     def __init__(
         self,
@@ -245,16 +254,16 @@ class ExtendedTyper(typer.Typer):
 
         # Sync with Typer's case_sensitive setting if not explicitly set
         if alias_case_sensitive is None:
-            context_settings = kwargs.get("context_settings") or {}
+            context_settings: dict[str, Any] = kwargs.get("context_settings") or {}
             typer_case_sensitive = context_settings.get("case_sensitive", True)
             self._alias_case_sensitive = typer_case_sensitive
         else:
             self._alias_case_sensitive = alias_case_sensitive
 
-        self._show_aliases_in_help = show_aliases_in_help
-        self._alias_display_format = alias_display_format
-        self._alias_separator = alias_separator
-        self._max_num_aliases = max_num_aliases
+        self.show_aliases_in_help = show_aliases_in_help
+        self.alias_display_format = alias_display_format
+        self.alias_separator = alias_separator
+        self.max_num_aliases = max_num_aliases
 
         # Mapping of command names to aliases (O(1) lookup)
         self._command_aliases: dict[str, list[str]] = {}
@@ -339,7 +348,7 @@ class ExtendedTyper(typer.Typer):
         """
         aliases = aliases or []
 
-        self.command(name, **kwargs)(func)
+        super().command(name, **kwargs)(func)
 
         for alias in aliases:
             self._register_alias(name, alias)
@@ -365,7 +374,7 @@ class ExtendedTyper(typer.Typer):
 
         return self._alias_to_command.get(normalised_name)
 
-    def get_command(self, ctx: Context, cmd_name: str) -> Optional[Command]:
+    def _get_command(self, ctx: Context, cmd_name: str) -> Optional[Command]:
         """Programmatically retrieve a command by its name/alias
 
         Args:
@@ -375,8 +384,8 @@ class ExtendedTyper(typer.Typer):
         Returns:
             The command if found, else None
         """
-        if not hasattr(self, "_group") or self._group is None:
-            if not hasattr(self, "_command") or self._command is None:
+        if getattr(self, "_group", None) is None:
+            if getattr(self, "_command", None) is None:
                 # Trigger CLI build
                 click_obj = typer.main.get_command(self)
 
@@ -401,14 +410,16 @@ class ExtendedTyper(typer.Typer):
             return group.commands[effective_name]
         return group.get_command(ctx, effective_name)
 
-    def command_with_aliases(
+    def command(
         self,
         name: Optional[Union[str, Callable[..., Any]]] = None,
         *,
         aliases: Optional[list[str]] = None,
         **kwargs: Any,
     ) -> Callable[[Callable[..., Any]], Command]:
-        """Decorator to register a command with aliases, similar to Typer's @app.command decorator
+        """Decorator to register a command with the specified name and optional aliases.
+
+        Overrides the default behavior of Typer's @app.command decorator.
 
         Args:
             name: The name of the command - if not provided, inferred from the function name
@@ -419,7 +430,6 @@ class ExtendedTyper(typer.Typer):
         Returns:
             A decorator that registers the command with the specified name and aliases
         """
-        # Decorator used without parentheses (name inferred)
         if callable(name):
             func = name
 
@@ -427,7 +437,6 @@ class ExtendedTyper(typer.Typer):
                 func, name=cast(HasName, func).__name__, aliases=None, **kwargs
             )
 
-        # Standard decorator with parentheses
         def decorator(func: Callable[..., Any]) -> Command:
             """Decorator to register a command with aliases
 
@@ -448,7 +457,7 @@ class ExtendedTyper(typer.Typer):
 
         return decorator
 
-    def add_aliased_command(
+    def add_command(
         self,
         func: Callable[..., Any],
         name: Optional[str] = None,
@@ -544,7 +553,7 @@ class ExtendedTyper(typer.Typer):
             return self._command_aliases[command_name].copy()
         return []
 
-    def list_commands_with_aliases(self) -> dict[str, list[str]]:
+    def list_commands(self) -> dict[str, list[str]]:
         """List all commands and their aliases
 
         Returns a dictionary mapping command names to their aliases - only includes commands with aliases and returns a copy, so modifications won't affect the original

@@ -17,8 +17,8 @@ class TestProgrammaticCommandInvocation:
         def delete_item():
             print("Deleting item...")
 
-        app.add_aliased_command(list_items, "list", aliases=["ls"])
-        app.add_aliased_command(delete_item, "delete", aliases=["rm", "del"])
+        app.add_command(list_items, "list", aliases=["ls"])
+        app.add_command(delete_item, "delete", aliases=["rm", "del"])
 
         result = cli_runner.invoke(app, ["list"])
         assert result.exit_code == 0
@@ -56,11 +56,11 @@ class TestProgrammaticCommandInvocation:
         """Test that removed alias no longer works"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls", "l"])
+        @app.command("list", aliases=["ls", "l"])
         def list_items():
             print("Listing items...")
 
-        @app.command_with_aliases("delete", aliases=["rm", "del"])
+        @app.command("delete", aliases=["rm", "del"])
         def delete_items():
             print("Deleting items...")
 
@@ -93,8 +93,8 @@ class TestProgrammaticWithArguments:
         def farewell(name: str):
             print(f"Goodbye, {name}!")
 
-        app.add_aliased_command(greet, "greet", aliases=["hi"])
-        app.add_aliased_command(farewell, "farewell", aliases=["bye"])
+        app.add_command(greet, "greet", aliases=["hi"])
+        app.add_command(farewell, "farewell", aliases=["bye"])
 
         result = cli_runner.invoke(app, ["greet", "World"])
         assert result.exit_code == 0
@@ -119,8 +119,8 @@ class TestProgrammaticWithArguments:
         def delete_item():
             print("Deleting item...")
 
-        app.add_aliased_command(list_items, "list", aliases=["ls"])
-        app.add_aliased_command(delete_item, "delete", aliases=["rm", "del"])
+        app.add_command(list_items, "list", aliases=["ls"])
+        app.add_command(delete_item, "delete", aliases=["rm", "del"])
 
         result = cli_runner.invoke(app, ["ls"])
         assert "Listing..." in result.output
@@ -185,7 +185,7 @@ class TestDynamicAliasManagement:
         def plugin_command():
             print("Plugin command executed")
 
-        app.add_aliased_command(plugin_command, "plugin-cmd", aliases=["pc", "plugin"])
+        app.add_command(plugin_command, "plugin-cmd", aliases=["pc", "plugin"])
 
         # Test plugin command works
         result = cli_runner.invoke(app, ["plugin-cmd"])
@@ -211,7 +211,7 @@ class TestMixingDecoratorAndProgrammatic:
         app = ExtendedTyper()
 
         # Decorator approach
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             print("Listing...")
 
@@ -219,7 +219,7 @@ class TestMixingDecoratorAndProgrammatic:
         def delete_item():
             print("Deleting...")
 
-        app.add_aliased_command(delete_item, "delete", aliases=["rm"])
+        app.add_command(delete_item, "delete", aliases=["rm"])
 
         # Both work via primary names
         result = cli_runner.invoke(app, ["list"])
@@ -239,11 +239,11 @@ class TestMixingDecoratorAndProgrammatic:
         """Test adding alias to command registered with decorator"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             print("Listing...")
 
-        @app.command_with_aliases("delete", aliases=["rm", "del"])
+        @app.command("delete", aliases=["rm", "del"])
         def delete_item():
             """Delete an item."""
             print("Deleting item...")
@@ -261,14 +261,14 @@ class TestMixingDecoratorAndProgrammatic:
         """Test querying aliases from mixed registration methods"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             pass
 
         def delete_item():
             pass
 
-        app.add_aliased_command(delete_item, "delete", aliases=["rm"])
+        app.add_command(delete_item, "delete", aliases=["rm"])
 
         # Query individual commands
         list_aliases = app.get_aliases("list")
@@ -278,7 +278,7 @@ class TestMixingDecoratorAndProgrammatic:
         assert delete_aliases == ["rm"]
 
         # Query all
-        all_aliases = app.list_commands_with_aliases()
+        all_aliases = app.list_commands()
         assert all_aliases == {"list": ["ls"], "delete": ["rm"]}
 
 
@@ -293,7 +293,7 @@ class TestHelpWithProgrammaticAPI:
             """List all items."""
             pass
 
-        app.add_aliased_command(
+        app.add_command(
             list_items, "list", aliases=["ls"], help="List items in the system"
         )
 
@@ -414,11 +414,11 @@ class TestRealWorldScenarios:
         """Test workflow where user customises aliases"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("checkout", aliases=["co"])
+        @app.command("checkout", aliases=["co"])
         def checkout(branch: str):
             print(f"Checked out {branch}")
 
-        @app.command_with_aliases("merge", aliases=["m"])
+        @app.command("merge", aliases=["m"])
         def merge(branch: str):
             print(f"Merged {branch} into current branch.")
 

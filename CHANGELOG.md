@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
+## [Unreleased]
+
+### Changed
+
+- **BREAKING:** Renamed `@app.command_with_aliases()` decorator to `@app.command()` for simpler, more intuitive API
+- **BREAKING:** Renamed `add_aliased_command()` decorator to `add_command()` for consitency with standard Typer API
+- Updated all tests and examples to use new method names
+
+### Added
+
+- Complete API Reference documentation (`docs/API_REFERENCE.md`)
+- Comprehensive User Guide with patterns and best practices (`docs/USER_GUIDE.md`)
+- Migration guide for switching from standard Typer (`docs/MIGRATION.md`)
+- `Context` class exported from core module for better Typer compatibility
+- `__getattr__` fallback in `__init__.py` for dynamic Typer attribute access
+- Enhanced example files with new method names and improved code patterns
+- PyPI release validation script (scripts/pypi.py)
+- TestPyPI release validation script (scripts/testpypi.py)
+
+### Changed
+
+- Refactored `scripts/release.py` to use module-level constants (TEST_ENV, DIST_DIR)
+- Updated `scripts/release.py` to use `uv venv` instead of `python3 -m venv`
+- Improved type hints throughout codebase
+
+
 ## [0.2.2] - 2026/01/15
 
 ### Added

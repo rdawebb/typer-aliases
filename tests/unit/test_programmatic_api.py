@@ -5,9 +5,9 @@ from typer_extensions import ExtendedTyper
 
 
 class TestAddAliasedCommand:
-    """Tests for add_aliased_command() method."""
+    """Tests for add_command() method."""
 
-    def test_add_command_with_aliases(self):
+    def test_add_command(self):
         """Test adding command with aliases programmatically."""
         app = ExtendedTyper()
 
@@ -19,7 +19,7 @@ class TestAddAliasedCommand:
             """Delete items."""
             pass
 
-        app.add_aliased_command(list_items, "list", aliases=["ls", "l"])
+        app.add_command(list_items, "list", aliases=["ls", "l"])
 
         assert "list" in app._command_aliases
         assert app._command_aliases["list"] == ["ls", "l"]
@@ -38,7 +38,7 @@ class TestAddAliasedCommand:
             """Delete items."""
             pass
 
-        app.add_aliased_command(list_items, "list", aliases=None)
+        app.add_command(list_items, "list", aliases=None)
 
         assert "list" not in app._command_aliases
         assert len(app._alias_to_command) == 0
@@ -55,7 +55,7 @@ class TestAddAliasedCommand:
             """Delete items."""
             pass
 
-        app.add_aliased_command(list_items, aliases=["ls"])
+        app.add_command(list_items, aliases=["ls"])
 
         # Name should be inferred from function
         assert "list_items" in app._command_aliases
@@ -73,7 +73,7 @@ class TestAddAliasedCommand:
             """Delete items."""
             pass
 
-        cmd = app.add_aliased_command(
+        cmd = app.add_command(
             list_items, "list", aliases=["ls"], help="Custom help", deprecated=True
         )
 
@@ -90,8 +90,8 @@ class TestAddAliasedCommand:
         def delete_item():
             pass
 
-        app.add_aliased_command(list_items, "list", aliases=["ls"])
-        app.add_aliased_command(delete_item, "delete", aliases=["rm"])
+        app.add_command(list_items, "list", aliases=["ls"])
+        app.add_command(delete_item, "delete", aliases=["rm"])
 
         assert len(app._command_aliases) == 2
         assert len(app._alias_to_command) == 2
@@ -125,12 +125,12 @@ class TestAddAlias:
         """Test adding alias to command registered with decorator."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             """List items."""
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm"])
+        @app.command("delete", aliases=["rm"])
         def delete_item():
             """Delete items."""
             pass
@@ -218,11 +218,11 @@ class TestRemoveAlias:
         """Test removing an existing alias."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls", "l"])
+        @app.command("list", aliases=["ls", "l"])
         def list_items():
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm"])
+        @app.command("delete", aliases=["rm"])
         def delete_item():
             pass
 
@@ -252,11 +252,11 @@ class TestRemoveAlias:
         """Test that removing one alias doesn't affect others."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls", "l", "dir"])
+        @app.command("list", aliases=["ls", "l", "dir"])
         def list_items():
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm"])
+        @app.command("delete", aliases=["rm"])
         def delete_item():
             pass
 
@@ -271,11 +271,11 @@ class TestRemoveAlias:
         """Test removing the last alias for a command."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm"])
+        @app.command("delete", aliases=["rm"])
         def delete_item():
             pass
 
@@ -289,11 +289,11 @@ class TestRemoveAlias:
         """Test removing alias with case insensitivity."""
         app = ExtendedTyper(alias_case_sensitive=False)
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm"])
+        @app.command("delete", aliases=["rm"])
         def delete_item():
             pass
 
@@ -307,11 +307,11 @@ class TestRemoveAlias:
         """Test idempotency of remove_alias."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm"])
+        @app.command("delete", aliases=["rm"])
         def delete_item():
             pass
 
@@ -329,7 +329,7 @@ class TestGetAliases:
         """Test getting aliases for command with aliases."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls", "l", "dir"])
+        @app.command("list", aliases=["ls", "l", "dir"])
         def list_items():
             pass
 
@@ -369,7 +369,7 @@ class TestGetAliases:
         """Test that get_aliases returns a copy, not reference."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls", "l"])
+        @app.command("list", aliases=["ls", "l"])
         def list_items():
             pass
 
@@ -407,7 +407,7 @@ class TestGetAliases:
         """Test getting aliases after removing one."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls", "l", "dir"])
+        @app.command("list", aliases=["ls", "l", "dir"])
         def list_items():
             pass
 
@@ -428,15 +428,15 @@ class TestListCommandsWithAliases:
         """Test listing all commands that have aliases."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls", "l"])
+        @app.command("list", aliases=["ls", "l"])
         def list_items():
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm"])
+        @app.command("delete", aliases=["rm"])
         def delete_item():
             pass
 
-        mapping = app.list_commands_with_aliases()
+        mapping = app.list_commands()
 
         assert mapping == {"list": ["ls", "l"], "delete": ["rm"]}
 
@@ -452,7 +452,7 @@ class TestListCommandsWithAliases:
         def delete_item():
             pass
 
-        mapping = app.list_commands_with_aliases()
+        mapping = app.list_commands()
 
         assert mapping == {}
 
@@ -460,27 +460,27 @@ class TestListCommandsWithAliases:
         """Test that list returns a copy of the data."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm"])
+        @app.command("delete", aliases=["rm"])
         def delete_item():
             pass
 
-        mapping = app.list_commands_with_aliases()
+        mapping = app.list_commands()
         mapping["list"].append("modified")
         mapping["new"] = ["test"]
 
         # Original should be unchanged
-        original_mapping = app.list_commands_with_aliases()
+        original_mapping = app.list_commands()
         assert original_mapping == {"list": ["ls"], "delete": ["rm"]}
 
     def test_list_excludes_commands_without_aliases(self):
         """Test that commands without aliases are excluded."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             pass
 
@@ -488,7 +488,7 @@ class TestListCommandsWithAliases:
         def say_hello():
             pass
 
-        mapping = app.list_commands_with_aliases()
+        mapping = app.list_commands()
 
         assert "list" in mapping
         assert "hello" not in mapping
@@ -501,20 +501,20 @@ class TestListCommandsWithAliases:
         def list_items():
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm"])
+        @app.command("delete", aliases=["rm"])
         def delete_item():
             pass
 
         # Add alias to list
         app.add_alias("list", "ls")
 
-        mapping = app.list_commands_with_aliases()
+        mapping = app.list_commands()
         assert mapping == {"list": ["ls"], "delete": ["rm"]}
 
         # Remove alias from delete
         app.remove_alias("rm")
 
-        mapping = app.list_commands_with_aliases()
+        mapping = app.list_commands()
         assert mapping == {"list": ["ls"]}
 
 
@@ -531,8 +531,8 @@ class TestProgrammaticAPIMixedUsage:
         def delete_item():
             pass
 
-        app.add_aliased_command(list_items, "list", aliases=["ls"])
-        app.add_aliased_command(delete_item, "delete", aliases=["rm"])
+        app.add_command(list_items, "list", aliases=["ls"])
+        app.add_command(delete_item, "delete", aliases=["rm"])
         app.add_alias("list", "l")
 
         aliases = app.get_aliases("list")
@@ -542,11 +542,11 @@ class TestProgrammaticAPIMixedUsage:
         """Test removing alias from decorated command."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls", "l"])
+        @app.command("list", aliases=["ls", "l"])
         def list_items():
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm"])
+        @app.command("delete", aliases=["rm"])
         def delete_item():
             pass
 
@@ -559,15 +559,15 @@ class TestProgrammaticAPIMixedUsage:
         """Test querying after mix of decorator and programmatic."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             pass
 
         def delete_item():
             pass
 
-        app.add_aliased_command(delete_item, "delete", aliases=["rm"])
+        app.add_command(delete_item, "delete", aliases=["rm"])
         app.add_alias("list", "l")
 
-        mapping = app.list_commands_with_aliases()
+        mapping = app.list_commands()
         assert mapping == {"list": ["ls", "l"], "delete": ["rm"]}

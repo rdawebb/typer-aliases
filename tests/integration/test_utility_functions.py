@@ -18,7 +18,7 @@ class TestUtilityFunctions:
             name = app.prompt("Enter your name")
             app.echo(f"Hello, {name}!")
 
-        @app.command_with_aliases(aliases=["bye", "farewell"])
+        @app.command(aliases=["bye", "farewell"])
         def goodbye():
             """Greet the user by name."""
             name = app.prompt("Enter your name")
@@ -71,7 +71,7 @@ class TestUtilityFunctions:
             pass
 
         # Valid int
-        result = cli_runner.invoke(app, ["ask-age"], input="30\n")
+        result = cli_runner.invoke(app, ["ask_age"], input="30\n")
         assert result.exit_code == 0
         assert "You are 30 years old." in result.output
 
@@ -87,7 +87,7 @@ class TestUtilityFunctions:
             else:
                 app.echo("File not saved.")
 
-        @app.command_with_aliases(aliases=["rm", "del"])
+        @app.command(aliases=["rm", "del"])
         def delete_file():
             """Delete a file."""
             if app.confirm("Are you sure you want to delete this file?"):
@@ -95,7 +95,7 @@ class TestUtilityFunctions:
             else:
                 app.echo("File not deleted.")
 
-        result = cli_runner.invoke(app, ["save-file"], input="y\n")
+        result = cli_runner.invoke(app, ["save_file"], input="y\n")
         assert result.exit_code == 0
         assert "File saved." in result.output
 
@@ -125,17 +125,17 @@ class TestUtilityFunctions:
             pass
 
         # Uppercase "Y"
-        result = cli_runner.invoke(app, ["save-file"], input="Y\n")
+        result = cli_runner.invoke(app, ["save_file"], input="Y\n")
         assert result.exit_code == 0
         assert "File saved." in result.output
 
         # Full word "no"
-        result = cli_runner.invoke(app, ["save-file"], input="no\n")
+        result = cli_runner.invoke(app, ["save_file"], input="no\n")
         assert result.exit_code == 0
         assert "File not saved." in result.output
 
         # Invalid input, then lowercase "y"
-        result = cli_runner.invoke(app, ["save-file"], input="maybe\ny\n")
+        result = cli_runner.invoke(app, ["save_file"], input="maybe\ny\n")
         assert result.exit_code == 0
         assert "File saved." in result.output
 
@@ -143,7 +143,7 @@ class TestUtilityFunctions:
         """Test getchar working with commands and aliases."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases(aliases=["char", "key"])
+        @app.command(aliases=["char", "key"])
         def getchar():
             """Get a single character input."""
             char = app.getchar()
@@ -170,7 +170,7 @@ class TestUtilityFunctions:
         """Test getchar working with special unicode characters."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases(aliases=["char", "key"])
+        @app.command(aliases=["char", "key"])
         def getchar():
             """Get a single character input."""
             char = app.getchar()
@@ -205,7 +205,7 @@ class TestUtilityFunctions:
         """Test launch working with commands and aliases."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases(aliases=["start", "run"])
+        @app.command(aliases=["start", "run"])
         def launch():
             """Launch a process."""
             app.launch("http://example.com")
@@ -235,7 +235,7 @@ class TestUtilityFunctions:
         """Test launch working with file paths and empty inputs."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases()
+        @app.command()
         def file():
             """Open a file path."""
             app.launch("/tmp/test.txt")
@@ -269,7 +269,7 @@ class TestUtilityFunctions:
             """Greet the user."""
             app.echo("Hello!")
 
-        @app.command_with_aliases("run", aliases=["execute", "start"])
+        @app.command("run", aliases=["execute", "start"])
         def run_alias():
             """Run a process."""
             app.echo("Process started.")

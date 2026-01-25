@@ -1,7 +1,7 @@
 """Integration tests for decorator usage in real CLI scenarios"""
 
 import typer
-from typer_extensions import ExtendedTyper
+from typer_extensions import ExtendedTyper, Context
 
 
 class TestDecoratorInvocation:
@@ -11,12 +11,12 @@ class TestDecoratorInvocation:
         """Test invoking decorated command by primary name"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls", "l"])
+        @app.command("list", aliases=["ls", "l"])
         def list_items():
             """List all items."""
             print("Listing items...")
 
-        @app.command_with_aliases("delete", aliases=["rm", "del"])
+        @app.command("delete", aliases=["rm", "del"])
         def delete_item():
             """Delete an item."""
             print("Deleting item...")
@@ -29,12 +29,12 @@ class TestDecoratorInvocation:
         """Test invoking decorated command by alias"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls", "l"])
+        @app.command("list", aliases=["ls", "l"])
         def list_items():
             """List all items."""
             print("Listing items...")
 
-        @app.command_with_aliases("delete", aliases=["rm", "del"])
+        @app.command("delete", aliases=["rm", "del"])
         def delete_item():
             """Delete an item."""
             print("Deleting item...")
@@ -51,12 +51,12 @@ class TestDecoratorInvocation:
         """Test invoking command decorated without parentheses"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases
+        @app.command
         def hello():
             """Say hello."""
             print("Hello!")
 
-        @app.command_with_aliases
+        @app.command
         def goodbye():
             """Say goodbye."""
             print("Goodbye!")
@@ -68,12 +68,12 @@ class TestDecoratorInvocation:
         """Test invoking command decorated without parentheses and with aliases"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases
+        @app.command
         def hello():
             """Say hello."""
             print("Hello!")
 
-        @app.command_with_aliases
+        @app.command
         def goodbye():
             """Say goodbye."""
             print("Goodbye!")
@@ -94,12 +94,12 @@ class TestDecoratorWithTyperFeatures:
         """Test decorated command with argument"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("greet", aliases=["hi", "hello"])
+        @app.command("greet", aliases=["hi", "hello"])
         def greet(name: str):
             """Greet someone."""
             print(f"Hello, {name}!")
 
-        @app.command_with_aliases("goodbye", aliases=["bye", "farewell"])
+        @app.command("goodbye", aliases=["bye", "farewell"])
         def goodbye(name: str):
             """Say goodbye."""
             print(f"Goodbye, {name}!")
@@ -117,7 +117,7 @@ class TestDecoratorWithTyperFeatures:
         """Test decorated command with option."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items(verbose: bool = typer.Option(False, "--verbose", "-v")):
             """List items."""
             if verbose:
@@ -125,7 +125,7 @@ class TestDecoratorWithTyperFeatures:
             else:
                 print("Listing items...")
 
-        @app.command_with_aliases("delete", aliases=["rm", "del"])
+        @app.command("delete", aliases=["rm", "del"])
         def delete_item():
             """Delete an item."""
             print("Deleting item...")
@@ -147,12 +147,12 @@ class TestDecoratorWithTyperFeatures:
         """Test decorated command with multiple arguments"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("copy", aliases=["cp"])
+        @app.command("copy", aliases=["cp"])
         def copy_file(source: str, dest: str):
             """Copy a file."""
             print(f"Copying {source} to {dest}")
 
-        @app.command_with_aliases("move", aliases=["mv"])
+        @app.command("move", aliases=["mv"])
         def move_file(source: str, dest: str):
             """Move a file."""
             print(f"Moving {source} to {dest}")
@@ -165,14 +165,14 @@ class TestDecoratorWithTyperFeatures:
         """Test decorated command with Typer context"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("info", aliases=["i"])
-        def show_info(ctx: typer.Context):
+        @app.command("info", aliases=["i"])
+        def show_info(ctx: Context):
             """Show info."""
             print(f"Command: {ctx.info_name}")
             print(f"Parent: {ctx.parent.info_name if ctx.parent else 'None'}")
 
-        @app.command_with_aliases("child", aliases=["c"])
-        def show_child_info(ctx: typer.Context):
+        @app.command("child", aliases=["c"])
+        def show_child_info(ctx: Context):
             """Show child info."""
             print(f"Child Command: {ctx.info_name}")
             print(f"Parent: {ctx.parent.info_name if ctx.parent else 'None'}")
@@ -192,12 +192,12 @@ class TestDecoratorHelpDisplay:
         """Test that main help shows decorated commands"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             """List all items in the system."""
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm"])
+        @app.command("delete", aliases=["rm"])
         def delete_item():
             """Delete an item."""
             pass
@@ -216,12 +216,12 @@ class TestDecoratorHelpDisplay:
         """Test command help via primary name"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items(verbose: bool = typer.Option(False, "--verbose")):
             """List all items in the system."""
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm", "del"])
+        @app.command("delete", aliases=["rm", "del"])
         def delete_item():
             """Delete an item."""
             print("Deleting item...")
@@ -236,12 +236,12 @@ class TestDecoratorHelpDisplay:
         """Test command help via alias"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items(verbose: bool = typer.Option(False, "--verbose")):
             """List all items in the system."""
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm", "del"])
+        @app.command("delete", aliases=["rm", "del"])
         def delete_item():
             """Delete an item."""
             print("Deleting item...")
@@ -260,12 +260,12 @@ class TestDecoratorHelpDisplay:
 
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls", "l"])
+        @app.command("list", aliases=["ls", "l"])
         def list_items():
             """List items."""
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm", "del"])
+        @app.command("delete", aliases=["rm", "del"])
         def delete_item():
             """Delete an item."""
             print("Deleting item...")
@@ -294,17 +294,17 @@ class TestDecoratorRealWorldScenarios:
         """Test a Git-like CLI with common aliases"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("checkout", aliases=["co"])
+        @app.command("checkout", aliases=["co"])
         def checkout(branch: str):
             """Checkout a branch."""
             print(f"Switched to branch '{branch}'")
 
-        @app.command_with_aliases("status", aliases=["st"])
+        @app.command("status", aliases=["st"])
         def status():
             """Show status."""
             print("On branch main")
 
-        @app.command_with_aliases("commit", aliases=["ci"])
+        @app.command("commit", aliases=["ci"])
         def commit(message: str = typer.Option(..., "--message", "-m")):
             """Commit changes."""
             print(f"Committed: {message}")
@@ -325,17 +325,17 @@ class TestDecoratorRealWorldScenarios:
         """Test a package manager-like CLI"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("install", aliases=["i", "add"])
+        @app.command("install", aliases=["i", "add"])
         def install(package: str):
             """Install a package."""
             print(f"Installing {package}...")
 
-        @app.command_with_aliases("remove", aliases=["rm", "uninstall"])
+        @app.command("remove", aliases=["rm", "uninstall"])
         def remove(package: str):
             """Remove a package."""
             print(f"Removing {package}...")
 
-        @app.command_with_aliases("list", aliases=["ls", "l"])
+        @app.command("list", aliases=["ls", "l"])
         def list_packages():
             """List installed packages."""
             print("Installed packages: pkg1, pkg2")
@@ -360,12 +360,12 @@ class TestDecoratorErrorHandling:
         """Test error when required argument is missing"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("greet", aliases=["hi"])
+        @app.command("greet", aliases=["hi"])
         def greet(name: str):
             """Greet someone."""
             print(f"Hello, {name}!")
 
-        @app.command_with_aliases("goodbye", aliases=["bye"])
+        @app.command("goodbye", aliases=["bye"])
         def goodbye(name: str):
             """Say goodbye."""
             print(f"Goodbye, {name}!")
@@ -379,12 +379,12 @@ class TestDecoratorErrorHandling:
         """Test invoking non-existent alias"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             """List items."""
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm", "del"])
+        @app.command("delete", aliases=["rm", "del"])
         def delete_item():
             """Delete an item."""
             print("Deleting item...")
@@ -402,7 +402,7 @@ class TestDecoratorWithStandardCommands:
         """Test using both decorator styles in same app."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             """List items."""
             print("Listing...")
@@ -426,7 +426,7 @@ class TestDecoratorWithStandardCommands:
         """Test that help shows both types of commands"""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             """List items."""
             pass

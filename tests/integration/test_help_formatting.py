@@ -10,12 +10,12 @@ class TestHelpAliasDisplay:
         """Test that help displays aliases grouped with commands."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls", "l"])
+        @app.command("list", aliases=["ls", "l"])
         def list_items():
             """List all items."""
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm"])
+        @app.command("delete", aliases=["rm"])
         def delete_item():
             """Delete an item."""
             pass
@@ -34,12 +34,12 @@ class TestHelpAliasDisplay:
         """Test that show_aliases_in_help config disables display."""
         app = ExtendedTyper(show_aliases_in_help=False)
 
-        @app.command_with_aliases("list", aliases=["ls", "l"])
+        @app.command("list", aliases=["ls", "l"])
         def list_items():
             """List all items."""
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm"])
+        @app.command("delete", aliases=["rm"])
         def delete_item():
             """Delete an item."""
             pass
@@ -59,12 +59,12 @@ class TestHelpAliasDisplay:
         """Test that many aliases are truncated with +N more."""
         app = ExtendedTyper(max_num_aliases=2)
 
-        @app.command_with_aliases("list", aliases=["a", "b", "c", "d"])
+        @app.command("list", aliases=["a", "b", "c", "d"])
         def list_items():
             """List items."""
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm"])
+        @app.command("delete", aliases=["rm"])
         def delete_item():
             """Delete an item."""
             pass
@@ -84,12 +84,12 @@ class TestHelpCustomFormatting:
         """Test custom alias display format."""
         app = ExtendedTyper(alias_display_format="[{aliases}]")
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             """List items."""
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm"])
+        @app.command("delete", aliases=["rm"])
         def delete_item():
             """Delete an item."""
             pass
@@ -106,12 +106,12 @@ class TestHelpCustomFormatting:
         """Test custom alias separator."""
         app = ExtendedTyper(alias_separator=" | ")
 
-        @app.command_with_aliases("list", aliases=["ls", "l"])
+        @app.command("list", aliases=["ls", "l"])
         def list_items():
             """List items."""
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm"])
+        @app.command("delete", aliases=["rm"])
         def delete_item():
             """Delete an item."""
             pass
@@ -131,12 +131,12 @@ class TestHelpCustomFormatting:
             max_num_aliases=2,
         )
 
-        @app.command_with_aliases("cmd", aliases=["a", "b", "c"])
+        @app.command("cmd", aliases=["a", "b", "c"])
         def some_command():
             """Do something."""
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm"])
+        @app.command("delete", aliases=["rm"])
         def delete_item():
             """Delete an item."""
             pass
@@ -156,7 +156,7 @@ class TestHelpWithMixedCommands:
         """Test mix of aliased and non-aliased commands."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             """List items."""
             pass
@@ -181,12 +181,12 @@ class TestHelpWithMixedCommands:
         """Test commands with different numbers of aliases."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls", "l", "dir"])
+        @app.command("list", aliases=["ls", "l", "dir"])
         def list_items():
             """List items."""
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm"])
+        @app.command("delete", aliases=["rm"])
         def delete_item():
             """Delete item."""
             pass
@@ -218,12 +218,12 @@ class TestHelpAlignment:
         """Test that command descriptions still align properly."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("short", aliases=["s"])
+        @app.command("short", aliases=["s"])
         def short_cmd():
             """Short command."""
             pass
 
-        @app.command_with_aliases("very-long-command-name", aliases=["vlcn"])
+        @app.command("very-long-command-name", aliases=["vlcn"])
         def long_cmd():
             """Long command."""
             pass
@@ -253,7 +253,7 @@ class TestHelpWithDynamicAliases:
             """List items."""
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm"])
+        @app.command("delete", aliases=["rm"])
         def delete_item():
             """Delete an item."""
             pass
@@ -277,12 +277,12 @@ class TestHelpWithDynamicAliases:
         """Test help updates after removing alias."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls", "l"])
+        @app.command("list", aliases=["ls", "l"])
         def list_items():
             """List items."""
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm"])
+        @app.command("delete", aliases=["rm"])
         def delete_item():
             """Delete an item."""
             pass
@@ -307,12 +307,12 @@ class TestHelpWithDynamicAliases:
         """Test help after removing all aliases."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             """List items."""
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm"])
+        @app.command("delete", aliases=["rm"])
         def delete_item():
             """Delete an item."""
             pass
@@ -336,11 +336,11 @@ class TestHelpEdgeCases:
         """Test command without docstring/help text."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             pass  # No docstring
 
-        @app.command_with_aliases("delete", aliases=["rm"])
+        @app.command("delete", aliases=["rm"])
         def delete_items():
             pass  # No docstring
 
@@ -357,12 +357,12 @@ class TestHelpEdgeCases:
 
         aliases = [f"alias{i}" for i in range(10)]
 
-        @app.command_with_aliases("cmd", aliases=aliases)
+        @app.command("cmd", aliases=aliases)
         def some_command():
             """Do something."""
             pass
 
-        @app.command_with_aliases("another", aliases=["an1"])
+        @app.command("another", aliases=["an1"])
         def another_command():
             """Show items."""
             pass
@@ -378,12 +378,12 @@ class TestHelpEdgeCases:
         """Test aliases with unicode characters."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["列表", "リスト"])
+        @app.command("list", aliases=["列表", "リスト"])
         def list_items():
             """List items."""
             pass
 
-        @app.command_with_aliases("delete", aliases=["削除", "さくじょ"])
+        @app.command("delete", aliases=["削除", "さくじょ"])
         def delete_item():
             """Delete an item."""
             pass
@@ -403,17 +403,17 @@ class TestHelpRealWorldScenarios:
         """Test Git-like CLI help display."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("checkout", aliases=["co"])
+        @app.command("checkout", aliases=["co"])
         def checkout(branch: str):
             """Switch to a branch."""
             pass
 
-        @app.command_with_aliases("commit", aliases=["ci"])
+        @app.command("commit", aliases=["ci"])
         def commit():
             """Record changes."""
             pass
 
-        @app.command_with_aliases("status", aliases=["st"])
+        @app.command("status", aliases=["st"])
         def status():
             """Show working tree status."""
             pass
@@ -436,17 +436,17 @@ class TestHelpRealWorldScenarios:
         """Test package manager-like help display."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("install", aliases=["i", "add"])
+        @app.command("install", aliases=["i", "add"])
         def install(package: str):
             """Install a package."""
             pass
 
-        @app.command_with_aliases("remove", aliases=["rm", "uninstall", "delete"])
+        @app.command("remove", aliases=["rm", "uninstall", "delete"])
         def remove(package: str):
             """Remove a package."""
             pass
 
-        @app.command_with_aliases("list", aliases=["ls", "l"])
+        @app.command("list", aliases=["ls", "l"])
         def list_packages():
             """List installed packages."""
             pass
@@ -464,12 +464,12 @@ class TestHelpRealWorldScenarios:
         """Test that help works when rich_markup_mode is not enabled."""
         app = ExtendedTyper(rich_markup_mode=None)
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items():
             """List all items."""
             pass
 
-        @app.command_with_aliases("delete", aliases=["rm"])
+        @app.command("delete", aliases=["rm"])
         def delete_item():
             """Delete an item."""
             pass

@@ -12,7 +12,7 @@ class TestExtendedTyperinitialisation:
         """Test that ExtendedTyper initialises with default config"""
         app = ExtendedTyper()
         assert app._alias_case_sensitive is True
-        assert app._show_aliases_in_help is True
+        assert app.show_aliases_in_help is True
         assert app._command_aliases == {}
         assert app._alias_to_command == {}
 
@@ -23,7 +23,7 @@ class TestExtendedTyperinitialisation:
             show_aliases_in_help=False,
         )
         assert app._alias_case_sensitive is False
-        assert app._show_aliases_in_help is False
+        assert app.show_aliases_in_help is False
 
 
 class TestNameNormalisation:
@@ -210,13 +210,13 @@ class TestCommandWithAliases:
 
 
 class TestGetCommand:
-    """Tests for get_command with alias support
+    """Tests for _get_command with alias support
 
     Note: These tests focus on multi-command scenarios, as single-command
     apps don't meaningfully support aliases (the command becomes the default)
     """
 
-    def test_get_command_multiple_commands_by_primary_name(self):
+    def test__get_command_multiple_commands_by_primary_name(self):
         """Test getting command by primary name in multi-command app"""
         from unittest.mock import MagicMock
 
@@ -234,11 +234,11 @@ class TestGetCommand:
 
         ctx = MagicMock()
 
-        cmd = app.get_command(ctx, "list")
+        cmd = app._get_command(ctx, "list")
         assert cmd is not None
         assert cmd.name == "list"
 
-    def test_get_command_by_alias_in_multi_command_app(self):
+    def test__get_command_by_alias_in_multi_command_app(self):
         """Test getting command by alias in multi-command app"""
         from unittest.mock import MagicMock
 
@@ -259,8 +259,8 @@ class TestGetCommand:
         ctx = MagicMock()
 
         # Test getting by alias
-        cmd_ls = app.get_command(ctx, "ls")
-        cmd_list = app.get_command(ctx, "list")
+        cmd_ls = app._get_command(ctx, "ls")
+        cmd_list = app._get_command(ctx, "list")
 
         assert cmd_ls is not None, "Failed to get command by alias 'ls'"
         assert cmd_list is not None, "Failed to get command by name 'list'"
@@ -268,7 +268,7 @@ class TestGetCommand:
             "Alias and primary command should have same callback"
         )
 
-    def test_get_command_nonexistent_in_multi_command_app(self):
+    def test__get_command_nonexistent_in_multi_command_app(self):
         """Test getting non-existent command returns None"""
         from unittest.mock import MagicMock
 
@@ -286,10 +286,10 @@ class TestGetCommand:
 
         ctx = MagicMock()
 
-        cmd = app.get_command(ctx, "nonexistent")
+        cmd = app._get_command(ctx, "nonexistent")
         assert cmd is None
 
-    def test_get_command_case_insensitive_alias(self):
+    def test__get_command_case_insensitive_alias(self):
         """Test getting command by case-insensitive alias"""
         from unittest.mock import MagicMock
 
@@ -309,10 +309,10 @@ class TestGetCommand:
         ctx = MagicMock()
 
         # Should work with different case
-        cmd = app.get_command(ctx, "LS")
+        cmd = app._get_command(ctx, "LS")
         assert cmd is not None
 
-    def test_get_command_multiple_aliases_same_command(self):
+    def test__get_command_multiple_aliases_same_command(self):
         """Test getting command by different aliases"""
         from unittest.mock import MagicMock
 
@@ -334,9 +334,9 @@ class TestGetCommand:
         ctx = MagicMock()
 
         # Test all aliases point to same command
-        cmd_list = app.get_command(ctx, "list")
-        cmd_ls = app.get_command(ctx, "ls")
-        cmd_l = app.get_command(ctx, "l")
+        cmd_list = app._get_command(ctx, "list")
+        cmd_ls = app._get_command(ctx, "ls")
+        cmd_l = app._get_command(ctx, "l")
 
         assert cmd_list is not None
         assert cmd_ls is not None
@@ -344,7 +344,7 @@ class TestGetCommand:
         assert cmd_ls.callback == cmd_list.callback
         assert cmd_l.callback == cmd_list.callback
 
-    def test_get_command_single_command_app(self):
+    def test__get_command_single_command_app(self):
         """Test getting command returns the default command"""
         from unittest.mock import MagicMock
 
@@ -358,15 +358,15 @@ class TestGetCommand:
         ctx = MagicMock()
 
         # Should return the command
-        cmd = app.get_command(ctx, "list")
+        cmd = app._get_command(ctx, "list")
         assert cmd is not None
         assert cmd.name == "list"
 
         # Should not resolve an alias
-        cmd_alias = app.get_command(ctx, "ls")
+        cmd_alias = app._get_command(ctx, "ls")
         assert cmd_alias is None
 
-    def test_get_command_with_unknown_command(self):
+    def test__get_command_with_unknown_command(self):
         """Test None is returned for unknown commands"""
         from unittest.mock import MagicMock
 
@@ -379,16 +379,15 @@ class TestGetCommand:
 
         ctx = MagicMock()
 
-        assert app.get_command(ctx, "unknown") is None
+        assert app._get_command(ctx, "unknown") is None
 
 
 class TestExtendedGroup:
     """Tests for ExtendedGroup get_command"""
 
-    def test_get_command_by_alias(self):
+    def test__get_command_by_alias(self):
         """Test ExtendedGroup resolves a command by alias"""
-        from click import Context
-        from typer_extensions.core import ExtendedGroup
+        from typer_extensions.core import Context, ExtendedGroup
 
         app = ExtendedTyper()
 
@@ -400,16 +399,15 @@ class TestExtendedGroup:
         group = ExtendedGroup(extended_typer=app)
         ctx = Context(group)
 
-        cmd = app.get_command(ctx, "list")
+        cmd = app._get_command(ctx, "list")
         assert cmd is not None
         group.add_command(cmd, name="list")
 
         assert group.get_command(ctx, "ls") is not None
 
-    def test_get_command_with_unknown_command(self):
+    def test__get_command_with_unknown_command(self):
         """Test ExtendedGroup returns None for unknown command/alias"""
-        from click import Context
-        from typer_extensions.core import ExtendedGroup
+        from typer_extensions.core import Context, ExtendedGroup
 
         app = ExtendedTyper()
         group = ExtendedGroup(extended_typer=app)
@@ -417,10 +415,9 @@ class TestExtendedGroup:
 
         assert group.get_command(ctx, "unknown") is None
 
-    def test_get_command_without_extended_typer(self):
+    def test__get_command_without_extended_typer(self):
         """Test ExtendedGroup.get_command when extended_typer is None"""
-        from click import Context
-        from typer_extensions.core import ExtendedGroup
+        from typer_extensions.core import Context, ExtendedGroup
 
         group = ExtendedGroup(extended_typer=None)
         ctx = Context(group)
@@ -553,12 +550,10 @@ class TestRemoveAliasEdgeCases:
         """Test remove_alias when primary command is not in _command_aliases dict"""
         app = ExtendedTyper()
 
-        @app.command("list")
         def list_items():
             """List items."""
             pass
 
-        @app.command("delete")
         def delete_items():
             """Delete items."""
             pass
@@ -574,10 +569,10 @@ class TestRemoveAliasEdgeCases:
 
 
 class TestGetCommandEdgeCases:
-    """Tests for edge cases in get_command"""
+    """Tests for edge cases in _get_command"""
 
     def test_get_command_with_fresh_app_single_command(self):
-        """Test get_command on fresh single-command app"""
+        """Test _get_command on fresh single-command app"""
         from unittest.mock import MagicMock
 
         app = ExtendedTyper()
@@ -591,12 +586,12 @@ class TestGetCommandEdgeCases:
         ctx = MagicMock()
 
         # First call should trigger CLI build
-        cmd = app.get_command(ctx, "main")
+        cmd = app._get_command(ctx, "main")
         assert cmd is not None
         assert cmd.name == "main"
 
     def test_get_command_returns_none_for_invalid_command(self):
-        """Test that get_command returns None for truly invalid commands"""
+        """Test that _get_command returns None for truly invalid commands"""
         from unittest.mock import MagicMock
 
         app = ExtendedTyper()
@@ -609,14 +604,14 @@ class TestGetCommandEdgeCases:
         ctx = MagicMock()
 
         # Get a valid command first to initialise _group
-        app.get_command(ctx, "list")
+        app._get_command(ctx, "list")
 
         # Invalid command, should return None
-        cmd = app.get_command(ctx, "invalid_command_xyz")
+        cmd = app._get_command(ctx, "invalid_command_xyz")
         assert cmd is None
 
     def test_get_command_with_no_group_or_command_initialised(self):
-        """Test get_command when neither _group nor _command are set"""
+        """Test _get_command when neither _group nor _command are set"""
         from unittest.mock import MagicMock, patch
 
         app = ExtendedTyper()
@@ -628,7 +623,7 @@ class TestGetCommandEdgeCases:
 
         ctx = MagicMock()
 
-        # Patch get_command to return an object without attributes
+        # Patch _get_command to return an object without attributes
         with patch("typer.main.get_command") as mock_get_cmd:
             # Return a mock that doesn't have 'commands' attribute
             mock_obj = MagicMock()
@@ -642,5 +637,5 @@ class TestGetCommandEdgeCases:
                 delattr(app, "_command")
 
             # Should return None when neither condition is met
-            result = app.get_command(ctx, "unknown")
+            result = app._get_command(ctx, "unknown")
             assert result is None

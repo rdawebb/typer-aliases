@@ -29,9 +29,9 @@ def create_item(name: str, description: str = ""):
 
 
 # Register commands programmatically
-app.add_aliased_command(list_items, "list", aliases=["ls", "l"])
-app.add_aliased_command(delete_item, "delete", aliases=["rm", "remove"])
-app.add_aliased_command(create_item, "create", aliases=["new"])
+app.add_command(list_items, "list", aliases=["ls", "l"])
+app.add_command(delete_item, "delete", aliases=["rm", "remove"])
+app.add_command(create_item, "create", aliases=["new"])
 
 
 # Example 2: Adding aliases to existing commands
@@ -74,7 +74,7 @@ def show_all_aliases():
     print("\nConfigured Command Aliases")
     print("=" * 50)
 
-    aliases_map = app.list_commands_with_aliases()
+    aliases_map = app.list_commands()
 
     if not aliases_map:
         print("No aliases configured")
@@ -95,14 +95,14 @@ def register_plugins():
         print("Backing up data...")
         print("Backup complete!")
 
-    app.add_aliased_command(backup_data, "backup", aliases=["bak", "save"])
+    app.add_command(backup_data, "backup", aliases=["bak", "save"])
 
     # Plugin 2: Export functionality
     def export_data(format: str = "json"):
         """Export data."""
         print(f"Exporting data as {format}...")
 
-    app.add_aliased_command(export_data, "export", aliases=["exp"])
+    app.add_command(export_data, "export", aliases=["exp"])
 
     print("Plugins registered: backup, export")
 

@@ -6,6 +6,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+TEST_ENV = ".test-env"
+DIST_DIR = "dist"
+
 
 def run_command(cmd: list[str], description: str) -> bool:
     """Run a command and report results
@@ -36,34 +39,29 @@ def build() -> int:
     project_root = script_dir.parent
     os.chdir(project_root)
 
-    test_env = ".test-env"
-    dist_dir = "dist"
-
     # Step 1: Build package
     if not run_command(["uv", "build"], "🔨 Building package"):
         return 1
 
     # Step 2: Clean test environment
     print("\n🧹 Cleaning test environment")
-    if Path(test_env).exists():
-        shutil.rmtree(test_env)
-        print(f"Removed {test_env}")
+    if Path(TEST_ENV).exists():
+        shutil.rmtree(TEST_ENV)
+        print(f"Removed {TEST_ENV}")
 
     # Step 3: Create test environment
-    if not run_command(
-        ["python3", "-m", "venv", test_env], "📦 Creating test environment"
-    ):
+    if not run_command(["uv", "venv", TEST_ENV], "📦 Creating test environment"):
         return 1
 
     # Step 4: Install package from dist & required dependencies
     print("\n💾 Installing package from dist")
-    wheel_files = list(Path(dist_dir).glob("*.whl"))
+    wheel_files = list(Path(DIST_DIR).glob("*.whl"))
     if not wheel_files:
         print("\n❌ No wheel file found in dist/")
         return 1
 
     wheel_path = wheel_files[0]
-    pip_cmd = f"source {test_env}/bin/activate && uv pip install {wheel_path} pytest && uv pip install twine"
+    pip_cmd = f"source {TEST_ENV}/bin/activate && uv pip install {wheel_path} pytest && uv pip install twine"
     try:
         subprocess.run(pip_cmd, shell=True, check=True, executable="/bin/bash")
         print(f"Installed {wheel_path.name}")
@@ -73,7 +71,7 @@ def build() -> int:
 
     # Step 5: Test import
     print("\n✅ Testing import")
-    import_cmd = f"source {test_env}/bin/activate && python -c 'import typer_extensions; print(f\"Version: {{typer_extensions.__version__}}\")'"
+    import_cmd = f"source {TEST_ENV}/bin/activate && python -c 'import typer_extensions; print(f\"Version: {{typer_extensions.__version__}}\")'"
     try:
         subprocess.run(import_cmd, shell=True, check=True, executable="/bin/bash")
     except subprocess.CalledProcessError as e:
@@ -82,7 +80,7 @@ def build() -> int:
 
     # Step 6: Check distribution
     print("\n🔍 Checking distribution")
-    check_cmd = f"source {test_env}/bin/activate && twine check {wheel_path}"
+    check_cmd = f"source {TEST_ENV}/bin/activate && twine check {wheel_path}"
     try:
         subprocess.run(check_cmd, shell=True, check=True, executable="/bin/bash")
     except subprocess.CalledProcessError as e:
@@ -91,7 +89,7 @@ def build() -> int:
 
     # Step 7: Run tests
     print("\n🧪 Running test suite\n")
-    test_cmd = f"source {test_env}/bin/activate && pytest ."
+    test_cmd = f"source {TEST_ENV}/bin/activate && pytest -v tests/"
     try:
         subprocess.run(test_cmd, shell=True, check=True, executable="/bin/bash")
     except subprocess.CalledProcessError as e:

@@ -10,7 +10,7 @@ class TestArgumentsWithAliases:
         """Test single positional argument via primary command."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("greet", aliases=["hi", "hello"])
+        @app.command("greet", aliases=["hi", "hello"])
         def greet(name: str):
             """Greet someone."""
             print(f"Hello, {name}!")
@@ -28,7 +28,7 @@ class TestArgumentsWithAliases:
         """Test single positional argument via alias."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("greet", aliases=["hi", "hello"])
+        @app.command("greet", aliases=["hi", "hello"])
         def greet(name: str):
             """Greet someone."""
             print(f"Hello, {name}!")
@@ -50,7 +50,7 @@ class TestArgumentsWithAliases:
         """Test multiple positional arguments via primary command."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("copy", aliases=["cp"])
+        @app.command("copy", aliases=["cp"])
         def copy_file(source: str, destination: str):
             """Copy a file."""
             print(f"Copying {source} to {destination}")
@@ -68,7 +68,7 @@ class TestArgumentsWithAliases:
         """Test multiple positional arguments via alias."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("copy", aliases=["cp"])
+        @app.command("copy", aliases=["cp"])
         def copy_file(source: str, destination: str):
             """Copy a file."""
             print(f"Copying {source} to {destination}")
@@ -86,7 +86,7 @@ class TestArgumentsWithAliases:
         """Test argument with integer type conversion."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("count", aliases=["c"])
+        @app.command("count", aliases=["c"])
         def count_down(number: int):
             """Count down from a number."""
             print(f"Counting down from {number}")
@@ -108,7 +108,7 @@ class TestArgumentsWithAliases:
         """Test argument with float type conversion."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("calculate", aliases=["calc"])
+        @app.command("calculate", aliases=["calc"])
         def calculate(value: float):
             """Calculate something."""
             result = value * 2
@@ -131,7 +131,7 @@ class TestArgumentsWithAliases:
         """Test optional argument with default value."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("say", aliases=["s"])
+        @app.command("say", aliases=["s"])
         def say(message: str = app.Argument("Hello")):
             """Say a message."""
             print(message)
@@ -157,7 +157,7 @@ class TestArgumentsWithAliases:
         """Test error when required argument is missing."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("greet", aliases=["hi"])
+        @app.command("greet", aliases=["hi"])
         def greet(name: str):
             """Greet someone."""
             print(f"Hello, {name}!")
@@ -178,7 +178,7 @@ class TestOptionsWithAliases:
         """Test boolean option flag via primary command."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items(verbose: bool = app.Option(False, "--verbose", "-v")):
             """List items."""
             if verbose:
@@ -207,7 +207,7 @@ class TestOptionsWithAliases:
         """Test boolean option flag via alias."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items(verbose: bool = app.Option(False, "--verbose", "-v")):
             """List items."""
             if verbose:
@@ -232,7 +232,7 @@ class TestOptionsWithAliases:
         """Test option with value via primary command."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("process", aliases=["proc"])
+        @app.command("process", aliases=["proc"])
         def process(output: str = app.Option("default.txt", "--output", "-o")):
             """Process with output file."""
             print(f"Writing to {output}")
@@ -250,7 +250,7 @@ class TestOptionsWithAliases:
         """Test option with value via alias."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("process", aliases=["proc"])
+        @app.command("process", aliases=["proc"])
         def process(output: str = app.Option("default.txt", "--output", "-o")):
             """Process with output file."""
             print(f"Writing to {output}")
@@ -268,7 +268,7 @@ class TestOptionsWithAliases:
         """Test option with default value."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("run", aliases=["r"])
+        @app.command("run", aliases=["r"])
         def run(threads: int = app.Option(1, "--threads", "-t")):
             """Run with specified threads."""
             print(f"Running with {threads} threads")
@@ -290,7 +290,7 @@ class TestOptionsWithAliases:
         """Test multiple options together via primary command."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("download", aliases=["dl"])
+        @app.command("download", aliases=["dl"])
         def download(
             url: str = app.Argument(...),
             output: str = app.Option("downloaded.bin", "--output", "-o"),
@@ -324,7 +324,7 @@ class TestOptionsWithAliases:
         """Test multiple options together via alias."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("download", aliases=["dl"])
+        @app.command("download", aliases=["dl"])
         def download(
             url: str = app.Argument(...),
             output: str = app.Option("downloaded.bin", "--output", "-o"),
@@ -350,7 +350,7 @@ class TestOptionsWithAliases:
         """Test option with only short flag."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("verify", aliases=["v"])
+        @app.command("verify", aliases=["v"])
         def verify(quiet: bool = app.Option(False, "-q")):
             """Verify something."""
             if quiet:
@@ -379,7 +379,7 @@ class TestArgumentOptionCombinations:
         """Test command with both argument and option via primary."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("deploy", aliases=["d"])
+        @app.command("deploy", aliases=["d"])
         def deploy(service: str, force: bool = app.Option(False, "--force", "-f")):
             """Deploy a service."""
             mode = "force" if force else "normal"
@@ -404,7 +404,7 @@ class TestArgumentOptionCombinations:
         """Test command with both argument and option via alias."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("deploy", aliases=["d"])
+        @app.command("deploy", aliases=["d"])
         def deploy(service: str, force: bool = app.Option(False, "--force", "-f")):
             """Deploy a service."""
             mode = "force" if force else "normal"
@@ -428,7 +428,7 @@ class TestArgumentOptionCombinations:
         """Test command with multiple arguments and options."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("build", aliases=["b"])
+        @app.command("build", aliases=["b"])
         def build(
             project: str = app.Argument(...),
             target: str = app.Argument("default"),
@@ -460,7 +460,7 @@ class TestArgumentOptionCombinations:
         """Test argument with boolean option flag."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("delete", aliases=["rm", "del"])
+        @app.command("delete", aliases=["rm", "del"])
         def delete(path: str, force: bool = app.Option(False, "--force", "-f")):
             """Delete a file or directory."""
             if force:
@@ -489,7 +489,7 @@ class TestHelpWithArgumentsOptions:
         """Test help shows argument info via primary command."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("greet", aliases=["hi"])
+        @app.command("greet", aliases=["hi"])
         def greet(name: str):
             """Greet someone by name."""
             print(f"Hello, {name}!")
@@ -506,7 +506,7 @@ class TestHelpWithArgumentsOptions:
         """Test help shows argument info via alias."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("greet", aliases=["hi"])
+        @app.command("greet", aliases=["hi"])
         def greet(name: str):
             """Greet someone by name."""
             print(f"Hello, {name}!")
@@ -523,7 +523,7 @@ class TestHelpWithArgumentsOptions:
         """Test help shows option info via primary command."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items(
             verbose: bool = app.Option(
                 False, "--verbose", "-v", help="Show verbose output"
@@ -544,7 +544,7 @@ class TestHelpWithArgumentsOptions:
         """Test help shows option info via alias."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("list", aliases=["ls"])
+        @app.command("list", aliases=["ls"])
         def list_items(
             verbose: bool = app.Option(
                 False, "--verbose", "-v", help="Show verbose output"
@@ -565,7 +565,7 @@ class TestHelpWithArgumentsOptions:
         """Test help shows all arguments and options."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("copy", aliases=["cp"])
+        @app.command("copy", aliases=["cp"])
         def copy_file(
             source: str = app.Argument(..., help="Source file path"),
             dest: str = app.Argument(..., help="Destination file path"),
@@ -592,7 +592,7 @@ class TestRealWorldScenarios:
         """Test Git-like 'add' command with pattern and options."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("add", aliases=["a"])
+        @app.command("add", aliases=["a"])
         def add(
             pattern: str = app.Argument(".", help="Files to add"),
             all_files: bool = app.Option(
@@ -622,7 +622,7 @@ class TestRealWorldScenarios:
         """Test Docker run-like command with multiple options."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("run", aliases=["r"])
+        @app.command("run", aliases=["r"])
         def run(
             image: str = app.Argument(...),
             detach: bool = app.Option(
@@ -657,7 +657,7 @@ class TestRealWorldScenarios:
         """Test npm install-like command with optional package and flags."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("install", aliases=["i", "add"])
+        @app.command("install", aliases=["i", "add"])
         def install(
             package: str = app.Argument(None, help="Package name"),
             save_dev: bool = app.Option(
@@ -698,7 +698,7 @@ class TestRealWorldScenarios:
         """Test config-like command with action argument and options."""
         app = ExtendedTyper()
 
-        @app.command_with_aliases("config", aliases=["cfg"])
+        @app.command("config", aliases=["cfg"])
         def config(
             action: str = app.Argument(..., help="Action: get, set, or list"),
             key: str = app.Argument(None, help="Config key"),

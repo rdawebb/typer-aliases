@@ -8,13 +8,13 @@ from typer_extensions import ExtendedTyper
 app = ExtendedTyper()
 
 
-@app.command_with_aliases("greet", aliases=["hi", "hello"])
+@app.command("greet", aliases=["hi", "hello"])
 def greet(name: str = app.Argument(...)):
     """Greet someone by name."""
     print(f"Hello, {name}!")
 
 
-@app.command_with_aliases("process", aliases=["p"])
+@app.command("process", aliases=["p"])
 def process(
     items: int = app.Argument(...),
     verbose: bool = app.Option(False, "--verbose", "-v"),
